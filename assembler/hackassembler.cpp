@@ -271,7 +271,7 @@ public:
 
     int hash(int number_of_memory_addresses) {
         const int memorable_location = 16;
-        int hash_value = memorable_location + number_of_memory_addresses;
+        unsigned int hash_value = memorable_location + number_of_memory_addresses;
         return hash_value;
     }
 
@@ -361,7 +361,7 @@ void assemble(const std::string& input_file, const std::string& output_file, Par
         if (parser.commandType() == "A_COMMAND") {
             // try if integer (@number)
             try {
-                int value = std::stoi(parser.symbol());
+                unsigned int value = std::stoi(parser.symbol());
                 std::cout << "0" << std::bitset<15>(value) << "\n";
                 hack_file << "0" << std::bitset<15>(value) << "\n";
             }
@@ -387,7 +387,7 @@ void assemble(const std::string& input_file, const std::string& output_file, Par
     hack_file.close();
 }
 
-void defineLabels(Parser& parser, Symbol& encoder, int& int_rom_address) {
+void defineLabels(Parser& parser, Symbol& encoder, unsigned int& int_rom_address) {
     while (parser.hasMoreCommands()) {
         parser.advance();
         if (parser.commandType() == "L_COMMAND") {
@@ -403,17 +403,17 @@ void defineLabels(Parser& parser, Symbol& encoder, int& int_rom_address) {
     parser.reset();
 }
 
-void defineSymbols(Parser& parser, Symbol& encoder, int& number_of_memory_addresses) {
+void defineSymbols(Parser& parser, Symbol& encoder, unsigned int& number_of_memory_addresses) {
     while (parser.hasMoreCommands()) {
         parser.advance();
         if (parser.commandType() == "A_COMMAND") {
             try {
-                int value = std::stoi(parser.symbol());
+                unsigned int value = std::stoi(parser.symbol());
             }
             // if stoi is impossible (because of symbol)@symbol), add into hash table
             catch (const std::invalid_argument&) {
                 if (encoder.contains(parser.symbol()) == false) {
-                    int int_memory_location = encoder.hash(number_of_memory_addresses);
+                    unsigned int int_memory_location = encoder.hash(number_of_memory_addresses);
                     number_of_memory_addresses++;
                     std::bitset<16> binary_memory_location(int_memory_location);
                     encoder.define(parser.symbol(), binary_memory_location);
@@ -430,15 +430,15 @@ int main() {
     const std::string input_file = "assembly_code.txt";
     const std::string output_file = "output.txt";
 
-    int rom_address = 0;
-    int random_memory_address = 0;
+    unsigned int rom_address = 0;
+    unsigned int memory_address = 0;
 
     Parser parser(input_file);
     Coder coder;
     Symbol encoder;
     
     defineLabels(parser, encoder, rom_address);
-    defineSymbols(parser, encoder, random_memory_address);
+    defineSymbols(parser, encoder, memory_address);
     parse(input_file, parser, encoder);
     assemble(input_file, output_file, parser, coder, encoder);
 
