@@ -26,7 +26,7 @@ public:
     Parser(const std::string& file) {
         VM_file.open(file);
         if (!VM_file.is_open()) {
-            std::cerr << "[error] There was a problem with opening the file.\n";
+            std::cerr << "[error] There was a problem with opening the input file.\n";
             exit(1);
         }
     }
@@ -126,7 +126,7 @@ public:
         throw std::invalid_argument("[error] arg1() should not be called for C_RETURN commands");
     }
 
-    std::unordered_set<std::string> defined_command_arguments = {
+    std::unordered_set<std::string> commands_with_args = {
         "C_PUSH",   
         "C_POP",
         "C_FUNCTION",
@@ -135,7 +135,7 @@ public:
 
     int arg2() { // returns the second argument of the command
         // iterate through the dictionary of defined commands
-        if (defined_command_arguments.find(commandType()) != defined_command_arguments.end()) {
+        if (commands_with_args.find(commandType()) != commands_with_args.end()) {
             const char delimiter = ' ';
             size_t delimiter_position = current_command.rfind(delimiter);
             std::string argument_index = current_command.substr(delimiter_position + 1, current_command.size());
@@ -151,20 +151,99 @@ public:
 class CodeWriter {
 private:
     std::ofstream assembly_file;
+    unsigned int stack_pointer = 256;
+
+    std::unordered_map<std::string, std::string> vm_to_asm {
+        {"add", "@SP\n"
+                "AM=M-1\n"
+                "D=M\n"
+                "A=A-1\n"
+                "M=M+D\n"},
+
+        {"sub", "@SP\n"
+                "AM=M-1\n"
+                "D=M\n"
+                "A=A-1\n"
+                "M=M-D\n"},  
+
+        {"neg", "@SP\n"
+                "A=M-1\n"
+                "M=-M\n"},         
+
+        {"eq", "@SP\n"
+               "AM=M-1\n"
+               "D=M\n"
+               "A=A-1\n"
+               "D=M-D\n"
+               "M=0\n"
+               "@END_EQ\n"
+               "D;JNE\n"
+               "@SP\n"
+               "A=M-1\n"
+               "M=-1\n"
+               "(END_EQ)\n"}, 
+
+        {"GT", "@SP\n"
+               "AM=M-1\n"
+               "D=M\n"
+               "A=A-1\n"
+               "D=M-D\n"
+               "M=0\n"
+               "@END_GT\n"
+               "D;JLE\n"
+               "@SP\n"
+               "A=M-1\n"
+               "M=-1\n"
+               "(END_GT)\n"}, 
+               
+        {"LT", "@SP\n"
+               "AM=M-1\n"
+               "D=M\n"
+               "A=A-1\n"
+               "D=M-D\n"
+               "M=0\n"
+               "@END_LT\n"
+               "D;JGE\n"
+               "@SP\n"
+               "A=M-1\n"
+               "M=-1\n"
+               "(END_LT)\n"},  
+
+        {"and", "@SP\n"
+                "AM=M-1\n"
+                "D=M\n"
+                "A=A-1\n"
+                "M=M&D\n"}, 
+
+        {"or", "@SP\n"
+                "AM=M-1\n"
+                "D=M\n"
+                "A=A-1\n"
+                "M=M|D\n"},
+
+        {"not", "@SP\n"
+                "A=M-1\n"
+                "M=!M\n"}        
+    };
+
 
 public:
     // this class reads relevant info from the parser and instantiates respective hack assembly instructions
     CodeWriter(const std::string& file) {
         try {
-            std::ofstream assembly_file(file);
-        }
-        catch (...) {
-            std::cerr << "[error] there was a problem creating the output assembly file.\n";
+            assembly_file.open(file);
+            if (!assembly_file.is_open()) {
+                throw std::ios_base::failure("[error] Unable to open output file.");
+            }
+        } 
+        catch (const std::ios_base::failure& e) {
+            std::cerr << e.what() << '\n';
         }
     }
 
     void writeArithmetic(std::string& command) {
-        
+        // pop 2 two elements off the stack and add them.
+        // note: SP starts at 256
     }
 
     void writePushPop(std::string& command, std::string& segment, int& index) {
