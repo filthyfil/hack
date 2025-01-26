@@ -153,7 +153,7 @@ private:
     std::ofstream assembly_file;
     unsigned int stack_pointer = 256;
 
-    std::unordered_map<std::string, std::string> vm_to_asm {
+    std::unordered_map<std::string, std::string> arithmetic_dictionary {
         {"add", "@SP\n"
                 "AM=M-1\n"
                 "D=M\n"
@@ -225,7 +225,6 @@ private:
                 "A=M-1\n"
                 "M=!M\n"}        
     };
-
 
 public:
     // this class reads relevant info from the parser and instantiates respective hack assembly instructions
