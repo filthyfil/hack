@@ -18,10 +18,11 @@
 
 class Parser {
     // this class unpacks a VM command into its components such that it is accessible and readable by the CodeWriter class
-public:
-    std::ifstream VM_file;
+private:
     std::string current_command;
+    std::ifstream VM_file;
 
+public:
     Parser(const std::string& file) {
         VM_file.open(file);
         if (!VM_file.is_open()) {
@@ -62,37 +63,88 @@ public:
     //      arithmetic, push / pop, 
     //      label, goto, if, 
     //      function, return, call
-    std::unordered_set<std::string> defined_arithmetic_commands = {
-        "add", // addition
-        "sub", // subtraction
-        "neg", // negative
-        "eq",  // equals
-        "gt",  // greater than
-        "lt",  // less than
-        "and", // AND operator
-        "or",  // OR operator
-        "not"  // NOT operator
+    std::unordered_map<std::string, std::string> defined_command_types = {
+        {"add",      "C_ARITHMETIC"},  // addition
+        {"sub",      "C_ARITHMETIC"},  // subtraction
+        {"neg",      "C_ARITHMETIC"},  // negative
+        {"eq",       "C_ARITHMETIC"},  // equals
+        {"gt",       "C_ARITHMETIC"},  // greater than
+        {"lt",       "C_ARITHMETIC"},  // less than
+        {"and",      "C_ARITHMETIC"},  // AND operator
+        {"or",       "C_ARITHMETIC"},  // OR operator
+        {"not",      "C_ARITHMETIC"},  // NOT operator 
+
+        {"push",     "C_PUSH"      },
+        {"pop",      "C_POP"       },
+        {"label",    "C_LABEL"     },
+        {"goto",     "C_GOTO"      },
+        {"if-goto",  "C_IF"        },
+        {"function", "C_FUNCTION"  },
+        {"call",     "C_CALL"      },
+        {"return",   "C_RETURN"    }
     };
 
     std::string commandType() {
         if (current_command.empty()) {
             return "NULL"; // return NULL for empty commands
         }
-
-        if (defined_arithmetic_commands.find(current_command) != defined_arithmetic_commands.end()){
-            return "C_ARITHMETIC"; // return C_ARITHMETIC if iterator doesnt point to end() of set
+        
+        // iterate through the dictionary of defined commands
+        auto it = defined_command_types.find(current_command);
+        if (it != defined_command_types.end()) { // find the key
+                return it->second;               // return its respective value
+        }
+        else {
+            std::cerr << "[error] there was an error finding the correct command type.\n";
         }
     }
 
     // NOTE: operations on the stack follow the reverse polish notation (RPN) in which operators are written
     //       after the operands. i.e. 2 3 add = 5
-    //       This notation is unambiguous and does not require parentheses.
-    std::string arg1() { // returns arguments like add, sub, etc on the stack
-
+    //       this notation is unambiguous and does not require parentheses.
+    std::string arg1() { // returns arguments like add, sub, etc
+        const char delimiter = ' ';
+        size_t delimiter_position = 0;
+        if (commandType() == "C_ARITHMETIC") {
+            return current_command; // the command itself is the argument
+        }
+        if (commandType() != "C_RETURN"){ 
+            // must return in the case of:
+            // >   "push constant 3040"
+            // return constant (which is the segment index)                  
+            delimiter_position = current_command.find(delimiter);
+            std::string segment_index = current_command.substr(delimiter_position + 1, current_command.size());
+            // >   "push constant 3040"
+            // becomes
+            // >   "constant 3040"
+            delimiter_position = segment_index.find(delimiter);
+            return segment_index.substr(0, delimiter_position);
+            // >   "constant 3040"
+            // becomes
+            // >   "constant"
+        }
+        throw std::invalid_argument("[error] arg1() should not be called for C_RETURN commands");
     }
 
-    int arg2() { // returns arguments of the operands on the stack
+    std::unordered_set<std::string> defined_command_arguments = {
+        "C_PUSH",   
+        "C_POP",
+        "C_FUNCTION",
+        "C_CALL"
+    };
 
+    int arg2() { // returns the second argument of the command
+        // iterate through the dictionary of defined commands
+        if (defined_command_arguments.find(commandType()) != defined_command_arguments.end()) {
+            const char delimiter = ' ';
+            size_t delimiter_position = current_command.rfind(delimiter);
+            std::string argument_index = current_command.substr(delimiter_position + 1, current_command.size());
+            return std::stoi(argument_index);
+        }
+       
+        else {
+            std::cerr << "[error] there was an error finding the correct command type.\n";
+        }
     }
 };
 
@@ -107,13 +159,12 @@ public:
             std::ofstream assembly_file(file);
         }
         catch (...) {
-            std::cerr << "(error) There was a problem creating the output assembly file.\n";
+            std::cerr << "[error] there was a problem creating the output assembly file.\n";
         }
-        
     }
 
     void writeArithmetic(std::string& command) {
-
+        
     }
 
     void writePushPop(std::string& command, std::string& segment, int& index) {
