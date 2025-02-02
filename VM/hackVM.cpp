@@ -89,13 +89,13 @@ public:
             return "NULL"; // return NULL for empty commands
         }
         
-        // iterate through the dictionary of defined commands
-        auto it = defined_command_types.find(current_command);
-        if (it != defined_command_types.end()) { // find the key
-                return it->second;               // return its respective value
+        try
+        {
+            defined_command_types[current_command];
         }
-        else {
-            std::cerr << "[error] there was an error finding the correct command type.\n";
+        catch(...)
+        {
+            std::cerr << "[error] Something went wrong with the defined_command_types mapping.";
         }
     }
 
@@ -123,7 +123,7 @@ public:
             // becomes
             // >   "constant"
         }
-        throw std::invalid_argument("[error] arg1() should not be called for C_RETURN commands");
+        throw std::invalid_argument("[error] arg1() should not be called for C_RETURN commands\n");
     }
 
     std::unordered_set<std::string> commands_with_args = {
@@ -151,7 +151,6 @@ public:
 class CodeWriter {
 private:
     std::ofstream assembly_file;
-    unsigned int stack_pointer = 256;
 
     std::unordered_map<std::string, std::string> arithmetic_dictionary {
         {"add", "@SP\n"
@@ -226,13 +225,109 @@ private:
                 "M=!M\n"}        
     };
 
+    std::string constant_vm_to_asm(const int  index) {
+        std::ostringstream translation;
+        translation << "@SP\n"
+                    << "A=M\n";
+        return translation.str();
+    }
+
+    std::string local_vm_to_asm(const int  index) {
+        std::ostringstream translation;
+        translation << "@LCL\n"
+                    << "A=M+" << index << '\n';
+        return translation.str();
+    }
+
+    std::string argument_vm_to_asm(const int  index) {
+        std::ostringstream translation;
+        translation << "@ARG\n"
+                    << "A=M+" << index << '\n';
+        return translation.str();
+    }
+
+    std::string this_vm_to_asm(const int  index) {
+        std::ostringstream translation;
+        translation << "@THIS\n"
+                    << "A=M+" << index << '\n';
+        return translation.str();
+    }
+
+    std::string that_vm_to_asm(const int  index) {
+        std::ostringstream translation;
+
+        translation << "@THAT\n"
+                    << "A=M+" << index << '\n';
+        return translation.str();
+    }
+
+    std::string pointer_vm_to_asm(const int  index) {
+        // pointer 0 holds the memory address of THIS in RAM[3]
+        // pointer 1 holds the memory address of THAT in RAM[4] 
+        // this offset is obviously 3, hence:
+        const int location_shift = 3;
+        std::ostringstream translation;
+        translation << "@" << (index + location_shift) << '\n'
+                    << "A=M\n";
+        return translation.str();
+    }
+
+    std::string temp_vm_to_asm(const int  index) {
+        // TEMP is located on RAM locations 5-12
+        if (0 <= index && index < 8) {
+            const int location_shift = 5;
+            std::ostringstream translation;
+            translation << "@" << (index + location_shift) << '\n'
+                        << "A=M\n";
+            return translation.str();
+        }
+        else { 
+            std::cerr << "[error] accessing memory out of range in temp segment.\n";
+        }
+    }
+
+    std::string static_vm_to_asm(const int  index) {
+        // static is located on RAM locations 16-255
+        if (0 <= index && index < 236) {
+            const int location_shift = 16;
+            std::ostringstream translation;
+            translation << "@" << (index + location_shift) << '\n'
+                        << "A=M\n";
+            return translation.str();
+        }
+        else { 
+            std::cerr << "[error] accessing memory out of range in static segment.\n";
+        }
+    }
+
+    void popper(){
+
+    }
+
+    void pusher(){
+        
+    }
+
+    std::unordered_map<std::string, std::string> memorySegmentator (const int & index) {
+        return {
+            {"constant", constant_vm_to_asm(index)},
+            {"local",    local_vm_to_asm(index)},
+            {"argument", argument_vm_to_asm(index)},
+            {"this",     this_vm_to_asm(index)},
+            {"that",     that_vm_to_asm(index)},
+            {"pointer",  pointer_vm_to_asm(index)},
+            {"temp",     temp_vm_to_asm(index)},
+            {"static",   static_vm_to_asm(index)}
+        };
+    }
+
 public:
     // this class reads relevant info from the parser and instantiates respective hack assembly instructions
     CodeWriter(const std::string& file) {
         try {
             assembly_file.open(file);
             if (!assembly_file.is_open()) {
-                throw std::ios_base::failure("[error] Unable to open output file.");
+                throw std::ios_base::failure("[error] Unable to open output file.\n");
             }
         } 
         catch (const std::ios_base::failure& e) {
@@ -240,13 +335,30 @@ public:
         }
     }
 
-    void writeArithmetic(std::string& command) {
+    void writeArithmetic(const std::string& command) {
         // pop 2 two elements off the stack and add them.
         // note: SP starts at 256
+        try
+        {
+            arithmetic_dictionary[command];
+        }
+        catch(...)
+        {
+            std::cerr << "[error] Something went wrong with the arithmetic dictionary.";
+        }
     }
 
-    void writePushPop(std::string& command, std::string& segment, int& index) {
+    void writePushPop (const std::string& command, const std::string& segment, const int& index) {
+        if (command == "push"){
+            auto vm_to_asm_mapper = memorySegmentator(index);
+            std::cout << vm_to_asm_mapper[segment];
+            assembly_file << vm_to_asm_mapper[segment];
+        }
 
+        if (command == "pop"){
+
+            return;
+        }
     }
 
     // more methods will be implemented
