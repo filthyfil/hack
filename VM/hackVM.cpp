@@ -225,88 +225,132 @@ private:
                 "M=!M\n"}        
     };
 
-    std::string constant_vm_to_asm(const int  index) {
-        std::ostringstream translation;
-        translation << "@SP\n"
-                    << "A=M\n";
-        return translation.str();
+    void constant_vm_to_asm(const int & index) {
+        assembly_file << "D=" << index << '\n'
+                      << "@SP\n";;
     }
 
-    std::string local_vm_to_asm(const int  index) {
-        std::ostringstream translation;
-        translation << "@LCL\n"
-                    << "A=M+" << index << '\n';
-        return translation.str();
+    void local_vm_to_asm(const int & index) {
+        assembly_file << "@LCL\n"
+                      << "A=M+" << index << '\n';
     }
 
-    std::string argument_vm_to_asm(const int  index) {
-        std::ostringstream translation;
-        translation << "@ARG\n"
-                    << "A=M+" << index << '\n';
-        return translation.str();
+    void argument_vm_to_asm(const int & index) {
+        assembly_file << "@ARG\n"
+                      << "A=M+" << index << '\n';
     }
 
-    std::string this_vm_to_asm(const int  index) {
-        std::ostringstream translation;
-        translation << "@THIS\n"
-                    << "A=M+" << index << '\n';
-        return translation.str();
+    void this_vm_to_asm(const int & index) {
+        assembly_file << "@THIS\n"
+                      << "A=M+" << index << '\n';
     }
 
-    std::string that_vm_to_asm(const int  index) {
-        std::ostringstream translation;
-
-        translation << "@THAT\n"
-                    << "A=M+" << index << '\n';
-        return translation.str();
+    void that_vm_to_asm(const int & index) {
+        assembly_file << "@THAT\n"
+                      << "A=M+" << index << '\n';
     }
 
-    std::string pointer_vm_to_asm(const int  index) {
+    void pointer_vm_to_asm(const int & index) {
         // pointer 0 holds the memory address of THIS in RAM[3]
         // pointer 1 holds the memory address of THAT in RAM[4] 
         // this offset is obviously 3, hence:
         const int location_shift = 3;
-        std::ostringstream translation;
-        translation << "@" << (index + location_shift) << '\n'
-                    << "A=M\n";
-        return translation.str();
+        assembly_file << "@" << (index + location_shift) << '\n'
+                      << "D=M\n"
+                      << "@SP\n";
     }
 
-    std::string temp_vm_to_asm(const int  index) {
+    void temp_vm_to_asm(const int & index) {
         // TEMP is located on RAM locations 5-12
         if (0 <= index && index < 8) {
             const int location_shift = 5;
-            std::ostringstream translation;
-            translation << "@" << (index + location_shift) << '\n'
-                        << "A=M\n";
-            return translation.str();
+            assembly_file << "@" << (index + location_shift) << '\n'
+                          << "A=M\n";
         }
         else { 
             std::cerr << "[error] accessing memory out of range in temp segment.\n";
         }
     }
 
-    std::string static_vm_to_asm(const int  index) {
+    void static_vm_to_asm(const int & index, unsigned int & static_stack_pointer) {
         // static is located on RAM locations 16-255
-        if (0 <= index && index < 236) {
-            const int location_shift = 16;
-            std::ostringstream translation;
-            translation << "@" << (index + location_shift) << '\n'
-                        << "A=M\n";
-            return translation.str();
+        unsigned int location_shift = 16;
+        assembly_file << "@" << (location_shift + static_stack_pointer) << '\n'
+                      << "A=M\n";
+    }
+
+    void pusher(const std::string & segment, unsigned int & static_stack_pointer){
+        // the comments below show work to make pusher() as compatible as possible with all segment types
+
+        // <constant> pushes index onto the stack:
+        /* 
+          -> D=<index>
+          -> @SP 
+           > A=M+1
+           > M=D
+           > @SP
+           > M=M+1
+        */
+
+        // <pointer> pushes onto the stack:
+        /* 
+          -> @MEM_VALUE (this already in the .asm program via the translation functions above ^-^)
+          -> D=M
+          -> @SP 
+           > A=M+1
+           > M=D
+           > @SP
+           > M=M+1
+        */
+
+        // <static> pushes onto the stack:
+        /* 
+          -> @MEM_VALUE (this already in the .asm program via the translation functions above ^-^)
+          -> @(static_stack_pointer) 
+          -> D=<index>
+           > A=M+1
+           > M=D
+           > @(static_stack_pointer) 
+           ++static_stack_pointer;
+           > M=M+1
+        */
+        if ((segment == "constant") || (segment == "static") || (segment == "pointer")) {
+            assembly_file << "A=M+1\n"
+                          << "M=D\n"
+                          << "@" << (segment == "static" ? std::to_string(static_stack_pointer) : "SP") << '\n'
+                          << "M=M+1\n";
+            if (segment == "static")
+                ++static_stack_pointer;
         }
-        else { 
-            std::cerr << "[error] accessing memory out of range in static segment.\n";
+
+        // all these just access respective memory segment for now:
+        // <local, argument, this, that> 
+        /* 
+           > @BASE_VALUE + INDEX (this already in the .asm program via the translation functions above ^-^)
+        */
+
+        // just an accessor for now:
+        // <temp>
+        /*
+          -> @MEM_VALUE (this already in the .asm program via the translation functions above ^-^)
+           > 
+        */
+
+    }
+    
+    void popper(const std::string & segment, unsigned int & static_stack_pointer){
+        // note this is copy and pasted. not done.
+        if ((segment == "constant") || (segment == "static") || (segment == "pointer")) {
+            assembly_file << "A=M+1\n"
+                          << "M=D\n"
+                          << "@" << (segment == "static" ? std::to_string(static_stack_pointer) : "SP") << '\n'
+                          << "M=M+1\n";
+            if (segment == "static")
+                --static_stack_pointer;
         }
     }
 
-    void popper(){
-
-    }
-
-    void pusher(){
-        
-    }
+    
 
     std::unordered_map<std::string, std::string> memorySegmentator (const int & index) {
         return {
@@ -323,14 +367,14 @@ private:
 
 public:
     // this class reads relevant info from the parser and instantiates respective hack assembly instructions
-    CodeWriter(const std::string& file) {
+    CodeWriter(const std::string & file) {
         try {
             assembly_file.open(file);
             if (!assembly_file.is_open()) {
                 throw std::ios_base::failure("[error] Unable to open output file.\n");
             }
         } 
-        catch (const std::ios_base::failure& e) {
+        catch (const std::ios_base::failure & e) {
             std::cerr << e.what() << '\n';
         }
     }
@@ -348,7 +392,7 @@ public:
         }
     }
 
-    void writePushPop (const std::string& command, const std::string& segment, const int& index) {
+    void writePushPop (const std::string & command, const std::string & segment, const int & index) {
         if (command == "push"){
             auto vm_to_asm_mapper = memorySegmentator(index);
             std::cout << vm_to_asm_mapper[segment];
