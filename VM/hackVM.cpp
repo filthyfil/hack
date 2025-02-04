@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <unordered_map>
 #include <bitset>
-//#include <functional>
+#include <functional>
 #include <unordered_set>
 
 
@@ -152,6 +152,74 @@ class CodeWriter {
 private:
     std::ofstream assembly_file;
 
+    // helper functions for vm to asm translation
+    void local_vm_to_asm(const int & index) {
+        assembly_file << "@LCL\n"
+                      << "A=M+" << index << '\n';
+    }
+
+    void argument_vm_to_asm(const int & index) {
+        assembly_file << "@ARG\n"
+                      << "A=M+" << index << '\n';
+    }
+
+    void this_vm_to_asm(const int & index) {
+        assembly_file << "@THIS\n"
+                      << "A=M+" << index << '\n';
+    }
+
+    void that_vm_to_asm(const int & index) {
+        assembly_file << "@THAT\n"
+                      << "A=M+" << index << '\n';
+    }
+
+    void temp_vm_to_asm(const int & index) {
+        // TEMP is located on RAM locations 5-12
+        if (0 <= index && index < 8) {
+            const int location_shift = 5;
+            assembly_file << "@" << (index + location_shift) << '\n';
+        }
+        else { 
+            std::cerr << "[error] accessing memory out of range in temp segment.\n";
+        }
+    }
+
+    void constant_vm_to_asm(const int & index) {
+        assembly_file << "D=" << index << '\n';
+    }
+
+    void pointer_vm_to_asm(const int & index) {
+        // pointer 0 holds the memory address of THIS in RAM[3]
+        // pointer 1 holds the memory address of THAT in RAM[4] 
+        // this offset is obviously 3, hence:
+        const int location_shift = 3;
+        assembly_file << "@" << (index + location_shift) << '\n';
+    }
+
+    void static_vm_to_asm(const int & index) {
+        // static is located on RAM locations 16-255 (239)
+        if (0 <= index && index < 239) {
+            unsigned int location_shift = 16;
+            assembly_file << "@" << (location_shift + index) << '\n';
+        }
+        else{
+            std::cerr << "[error] accessing memory out of range in static segment.\n";
+        }
+    }
+
+    using vm_to_asm = void (CodeWriter::*)(const int &);
+    std::unordered_map<std::string, vm_to_asm> memorySegmentator {
+        {"constant", &CodeWriter::constant_vm_to_asm},
+        {"local",    &CodeWriter::local_vm_to_asm},
+        {"argument", &CodeWriter::argument_vm_to_asm},
+        {"this",     &CodeWriter::this_vm_to_asm},
+        {"that",     &CodeWriter::that_vm_to_asm},
+        {"pointer",  &CodeWriter::pointer_vm_to_asm},
+        {"temp",     &CodeWriter::temp_vm_to_asm},
+        {"static",   &CodeWriter::static_vm_to_asm}
+    };
+
+    // arithmetic map
     std::unordered_map<std::string, std::string> arithmetic_dictionary {
         {"add", "@SP\n"
                 "AM=M-1\n"
@@ -225,104 +293,21 @@ private:
                 "M=!M\n"}        
     };
 
-    void constant_vm_to_asm(const int & index) {
-        assembly_file << "D=" << index << '\n'
-                      << "@SP\n";;
-    }
-
-    void local_vm_to_asm(const int & index) {
-        assembly_file << "@LCL\n"
-                      << "A=M+" << index << '\n';
-    }
-
-    void argument_vm_to_asm(const int & index) {
-        assembly_file << "@ARG\n"
-                      << "A=M+" << index << '\n';
-    }
-
-    void this_vm_to_asm(const int & index) {
-        assembly_file << "@THIS\n"
-                      << "A=M+" << index << '\n';
-    }
-
-    void that_vm_to_asm(const int & index) {
-        assembly_file << "@THAT\n"
-                      << "A=M+" << index << '\n';
-    }
-
-    void pointer_vm_to_asm(const int & index) {
-        // pointer 0 holds the memory address of THIS in RAM[3]
-        // pointer 1 holds the memory address of THAT in RAM[4] 
-        // this offset is obviously 3, hence:
-        const int location_shift = 3;
-        assembly_file << "@" << (index + location_shift) << '\n'
-                      << "D=M\n"
-                      << "@SP\n";
-    }
-
-    void temp_vm_to_asm(const int & index) {
-        // TEMP is located on RAM locations 5-12
-        if (0 <= index && index < 8) {
-            const int location_shift = 5;
-            assembly_file << "@" << (index + location_shift) << '\n'
-                          << "A=M\n";
+public:
+    void push(const std::string & segment, const int & index){
+        // pushes a value from segment[index] into the stack
+        try {
+            (this->*memorySegmentator[segment])(index); // @<segment + index> 
+            if ((segment == "constant") || (segment == "static") || (segment == "pointer")) {
+                assembly_file << "D=M\n"
+                            << "@SP\n"
+                            << "AM=M+1\n"
+                            << "M=D\n";
+            }
         }
-        else { 
-            std::cerr << "[error] accessing memory out of range in temp segment.\n";
+        catch(...) {
+            std::cerr << "[error] something went wrong while pushing to the stack.";
         }
-    }
-
-    void static_vm_to_asm(const int & index, unsigned int & static_stack_pointer) {
-        // static is located on RAM locations 16-255
-        unsigned int location_shift = 16;
-        assembly_file << "@" << (location_shift + static_stack_pointer) << '\n'
-                      << "A=M\n";
-    }
-
-    void pusher(const std::string & segment, unsigned int & static_stack_pointer){
-        // the comments below show work to make pusher() as compatible as possible with all segment types
-
-        // <constant> pushes index onto the stack:
-        /* 
-          -> D=<index>
-          -> @SP 
-           > A=M+1
-           > M=D
-           > @SP
-           > M=M+1
-        */
-
-        // <pointer> pushes onto the stack:
-        /* 
-          -> @MEM_VALUE (this already in the .asm program via the translation functions above ^-^)
-          -> D=M
-          -> @SP 
-           > A=M+1
-           > M=D
-           > @SP
-           > M=M+1
-        */
-
-        // <static> pushes onto the stack:
-        /* 
-          -> @MEM_VALUE (this already in the .asm program via the translation functions above ^-^)
-          -> @(static_stack_pointer) 
-          -> D=<index>
-           > A=M+1
-           > M=D
-           > @(static_stack_pointer) 
-           ++static_stack_pointer;
-           > M=M+1
-        */
-        if ((segment == "constant") || (segment == "static") || (segment == "pointer")) {
-            assembly_file << "A=M+1\n"
-                          << "M=D\n"
-                          << "@" << (segment == "static" ? std::to_string(static_stack_pointer) : "SP") << '\n'
-                          << "M=M+1\n";
-            if (segment == "static")
-                ++static_stack_pointer;
-        }
-
         // all these just access respective memory segment for now:
         // <local, argument, this, that> 
         /* 
@@ -335,34 +320,23 @@ private:
           -> @MEM_VALUE (this already in the .asm program via the translation functions above ^-^)
            > 
         */
-
     }
     
-    void popper(const std::string & segment, unsigned int & static_stack_pointer){
-        // note this is copy and pasted. not done.
-        if ((segment == "constant") || (segment == "static") || (segment == "pointer")) {
-            assembly_file << "A=M+1\n"
-                          << "M=D\n"
-                          << "@" << (segment == "static" ? std::to_string(static_stack_pointer) : "SP") << '\n'
-                          << "M=M+1\n";
-            if (segment == "static")
-                --static_stack_pointer;
+    void pop(const std::string & segment, const int & index){
+        // pops a value off the stack into segment[index]
+        try {
+            if ((segment == "constant") || (segment == "static") || (segment == "pointer")) {
+                assembly_file << "@SP\n"
+                            << "@D=M\n";
+                (this->*memorySegmentator[segment])(index); // @<segment + index> 
+                assembly_file << "M=D\n"
+                            << "@SP\n"
+                            << "M=M-1\n";
+            }
         }
-    }
-
-    
-
-    std::unordered_map<std::string, std::string> memorySegmentator (const int & index) {
-        return {
-            {"constant", constant_vm_to_asm(index)},
-            {"local",    local_vm_to_asm(index)},
-            {"argument", argument_vm_to_asm(index)},
-            {"this",     this_vm_to_asm(index)},
-            {"that",     that_vm_to_asm(index)},
-            {"pointer",  pointer_vm_to_asm(index)},
-            {"temp",     temp_vm_to_asm(index)},
-            {"static",   static_vm_to_asm(index)}
-        };
+        catch(...) {
+            "[error] something went wrong while popping from the stack.";
+        }
     }
 
 public:
@@ -394,13 +368,12 @@ public:
 
     void writePushPop (const std::string & command, const std::string & segment, const int & index) {
         if (command == "push"){
-            auto vm_to_asm_mapper = memorySegmentator(index);
-            std::cout << vm_to_asm_mapper[segment];
-            assembly_file << vm_to_asm_mapper[segment];
+            push(segment, index);
+            return;
         }
 
         if (command == "pop"){
-
+            pop(segment, index);
             return;
         }
     }
