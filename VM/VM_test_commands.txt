@@ -1,25 +1,38 @@
-function Main.fibonacci 0
-    push argument 0
-    push constant 2
-    lt                     // checks if n<2
-    if-goto IF_TRUE
-    goto IF_FALSE
-    label IF_TRUE          // if n<2, return n
-    push argument 0        
-    return
-    label IF_FALSE         // if n>=2, returns fib(n-2)+fib(n-1)
-    push argument 0
-    push constant 2
-    sub
-    call Main.fibonacci 1  // computes fib(n-2)
-    push argument 0
-    push constant 1
-    sub
-    call Main.fibonacci 1  // computes fib(n-1)
-    add                    // returns fib(n-1) + fib(n-2)
-    return
-function Sys.init 0
-    push constant 4
-    call Main.fibonacci 1   // computes the 4'th fibonacci element
-label WHILE
-    goto WHILE              // loops infinitely
+push constant 17
+push constant 17
+eq
+push constant 17
+push constant 16
+eq
+push constant 16
+push constant 17
+eq
+push constant 892
+push constant 891
+lt
+push constant 891
+push constant 892
+lt
+push constant 891
+push constant 891
+lt
+push constant 32767
+push constant 32766
+gt
+push constant 32766
+push constant 32767
+gt
+push constant 32766
+push constant 32766
+gt
+push constant 57
+push constant 31
+push constant 53
+add
+push constant 112
+sub
+neg
+and
+push constant 82
+or
+not

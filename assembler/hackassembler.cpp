@@ -28,7 +28,7 @@ public:
     Parser(const std::string& file) {
         assembly_file.open(file);
         if (!assembly_file.is_open()) {
-            std::cerr << "[error] There was a problem with opening the file.\n";
+            std::cerr << "[error] there was a problem with opening the file.\n";
             exit(1);
         }
     }
