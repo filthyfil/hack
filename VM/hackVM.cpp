@@ -115,9 +115,9 @@ public:
         std::string command_token = commandTokenizer();
 
         try {
-            return defined_command_types.at(command_token); // using at() is safer (it throws if not found)
+            return defined_command_types.at(command_token); 
         }
-        catch(const std::out_of_range& e) {
+        catch (const std::out_of_range & e) {
             std::cerr << "[error] Command type not found for command: " << current_command << "\n";
             throw std::invalid_argument("[error] Unknown command type.");
         }
@@ -159,7 +159,7 @@ public:
             std::string index = current_command.substr(delimiter_position + 1);
             try {
                 return std::stoi(index);
-            } catch(const std::exception &e) {
+            } catch (const std::exception & e) {
                 throw std::invalid_argument(std::string("[error] Conversion to int failed: ") + e.what());
             }
         }
@@ -193,302 +193,345 @@ public:
 };
 
 class CodeWriter {
-private:
-    std::string vm_file_name;
-    std::ofstream assembly_file;
-
-    // for static variables, since they are of the form @Foo.(index)
-    void vmFileNameTrimmer(std::string & file_name) {
-        size_t dot_position = file_name.find('.');
-        if (dot_position != std::string::npos) {
-            file_name = file_name.substr(0, dot_position + 1);
-        }
-    }
-
-    // helper functions for vm to asm translation
-    void local_vm_to_asm(const int & index) {
-        assembly_file << "@LCL\n"
-                      << "D=M\n"
-                      << "@" << index << '\n'
-                      << "D=D+A\n"
-                      << "A=D\n";
-    }
-
-    void argument_vm_to_asm(const int & index) {
-        assembly_file << "@ARG\n"
-                      << "D=M\n"
-                      << "@" << index << '\n'
-                      << "D=D+A\n"
-                      << "A=D\n";
-    }
-
-    void this_vm_to_asm(const int & index) {
-        assembly_file << "@THIS\n"
-                      << "D=M\n"
-                      << "@" << index << '\n'
-                      << "D=D+A\n"
-                      << "A=D\n";
-    }
-
-    void that_vm_to_asm(const int & index) {
-        assembly_file << "@THAT\n"
-                      << "D=M\n"
-                      << "@" << index << '\n'
-                      << "D=D+A\n"
-                      << "A=D\n";
-    }
-
-    void temp_vm_to_asm(const int & index) {
-        // TEMP is located on RAM locations 5-12
-        if (0 <= index && index < 8) {
-            const int location_shift = 5;
-            assembly_file << "@" << (index + location_shift) << '\n';
-        }
-        else { 
-            std::cerr << "[error] accessing memory out of range in temp segment.\n";
-        }
-    }
-
-    void constant_vm_to_asm(const int & index) {
-        assembly_file << "@" << index << '\n'
-                      << "D=A\n";
-    }
-
-    void pointer_vm_to_asm(const int & index) {
-        // pointer 0 holds the memory address of THIS in RAM[3]
-        // pointer 1 holds the memory address of THAT in RAM[4] 
-        // this offset is obviously 3, hence:
-        const int location_shift = 3;
-        assembly_file << "@" << (index + location_shift) << '\n'
-                      << "D=M\n";
-    }
-
-    void static_vm_to_asm(const int & index) {
-        // static is located on RAM locations 16-255 (239)
-        if (0 <= index && index < 239) {
-            unsigned int location_shift = 16;
-            assembly_file << "@" << vm_file_name << index << '\n'
-                          << "D=M\n";
-        }
-        else {
-            std::cerr << "[error] accessing memory out of range in static segment.\n";
-        }
-    }
-
-    std::unordered_map<std::string, void (CodeWriter::*)(const int &)> memorySegmentator {
-        {"constant", &CodeWriter::constant_vm_to_asm},
-        {"local",    &CodeWriter::local_vm_to_asm},
-        {"argument", &CodeWriter::argument_vm_to_asm},
-        {"this",     &CodeWriter::this_vm_to_asm},
-        {"that",     &CodeWriter::that_vm_to_asm},
-        {"pointer",  &CodeWriter::pointer_vm_to_asm},
-        {"temp",     &CodeWriter::temp_vm_to_asm},
-        {"static",   &CodeWriter::static_vm_to_asm}
-    };
-
-    // arithmetic map
-    std::unordered_map<std::string, std::string> arithmetic_dictionary {
-        {"add", "@SP\n"
-                "AM=M-1\n"
-                "D=M\n"
-                "A=A-1\n"
-                "M=D+M\n"},
-
-        {"sub", "@SP\n"
-                "AM=M-1\n"
-                "D=M\n"
-                "A=A-1\n"
-                "M=M-D\n"},  
-
-        {"neg", "@SP\n"
-                "A=M-1\n"
-                "M=-M\n"},         
-
-        {"eq", "@SP\n"
-               "AM=M-1\n"
-               "D=M\n"
-               "A=A-1\n"
-               "D=M-D\n"
-               "M=0\n"
-               "@END_EQ\n"
-               "D;JNE\n"
-               "@SP\n"
-               "A=M-1\n"
-               "M=-1\n"
-               "(END_EQ_"}, // relationalOperationCounter() method adds > "count)\n"
-
-        {"gt", "@SP\n"
-               "AM=M-1\n"
-               "D=M\n"
-               "A=A-1\n"
-               "D=M-D\n"
-               "M=0\n"
-               "@END_GT\n"
-               "D;JLE\n"
-               "@SP\n"
-               "A=M-1\n"
-               "M=-1\n"
-               "(END_GT_"}, // relationalOperationCounter() method adds > "count)\n"
-               
-        {"lt", "@SP\n"
-               "AM=M-1\n"
-               "D=M\n"
-               "A=A-1\n"
-               "D=M-D\n"
-               "M=0\n"
-               "@END_LT\n"
-               "D;JGE\n"
-               "@SP\n"
-               "A=M-1\n"
-               "M=-1\n"
-               "(END_LT_"}, // relationalOperationCounter() method adds > "count)\n"
-
-        {"and", "@SP\n"
-                "AM=M-1\n"
-                "D=M\n"
-                "A=A-1\n"
-                "M=D&M\n"}, 
-
-        {"or", "@SP\n"
-                "AM=M-1\n"
-                "D=M\n"
-                "A=A-1\n"
-                "M=D|M\n"},
-
-        {"not", "@SP\n"
-                "A=M-1\n"
-                "M=!M\n"}        
-    };
-
-    unsigned int EQ_COUNTER = 0;
-    unsigned int GT_COUNTER = 0;
-    unsigned int LT_COUNTER = 0;
-    void relationalOperationCounter(Parser & parser){
-        std::string command = parser.commandTokenizer();
-        if (command == "eq") {
-            assembly_file << EQ_COUNTER << ")\n";
-            ++EQ_COUNTER;
-        }
-        if (command == "gt") {
-            assembly_file << GT_COUNTER << ")\n";
-            ++GT_COUNTER;
-        }
-        if (command == "lt") {
-            assembly_file << LT_COUNTER << ")\n";
-            ++LT_COUNTER;        
-        }
-    }
-
-    void push(const std::string & segment, const int & index){
-        // pushes a value from segment[index] into the stack
-        try {
-            (this->*memorySegmentator[segment])(index); // @<segment + index> 
-            assembly_file << "@SP\n"
-                          << "A=M\n"
-                          << "M=D\n"
-                          << "@SP\n"
-                          << "M=M+1\n";
-        }
-        catch(...) {
-            std::cerr << "[error] something went wrong while pushing to the stack.";
-        }
-    }
+    private:
+        std::string vm_file_name;
+        std::ofstream assembly_file;
     
-    void pop(const std::string & segment, const int & index){
-        // pops a value off the stack into segment[index]
-        try {
-            assembly_file << "@SP\n"
-                          << "AM=M-1\n"
-                          << "D=M\n";
-            (this->*memorySegmentator[segment])(index); // @<segment + index> 
-            assembly_file << "M=D\n";
-            
-        }
-        catch(...) {
-            "[error] something went wrong while popping from the stack.";
-        }
-    }
-
-public:
-    // this class reads relevant info from the parser and instantiates respective hack assembly instructions
-    CodeWriter(const std::string & vm_file, const std::string & asm_file) {
-        try {
-            assembly_file.open(asm_file);
-            if (!assembly_file.is_open()) {
-                throw std::ios_base::failure("[error] unable to open output file.\n");
+        // for static variables: trim the filename (e.g. "Foo.vm" becomes "Foo.")
+        void vmFileNameTrimmer(std::string & file_name) {
+            size_t dot_position = file_name.find('.');
+            if (dot_position != std::string::npos) {
+                file_name = file_name.substr(0, dot_position + 1);
             }
-            vm_file_name = vm_file;
-            vmFileNameTrimmer(vm_file_name);
-        } 
-        catch (const std::ios_base::failure & e) {
-            std::cerr << e.what() << '\n';
         }
-    }
-
-    ~CodeWriter() {
-        if (assembly_file.is_open()) {
-            assembly_file.close();
+    
+        // these functions now only compute the effective address and leave it in D
+        // (they do not load the memory content)
+        void local_vm_to_asm(const int & index) {
+            assembly_file << "@LCL\n"
+                          << "D=M\n"
+                          << "@" << index << "\n"
+                          << "D=D+A\n";  // D now holds (LCL + index)
         }
-    }
-
-    void writeArithmetic(Parser & parser, const std::string & command) {
-        // pop 2 two elements off the stack and add them.
-        // note: SP starts at 256
-        try
-        {
-            assembly_file << arithmetic_dictionary[command];
-            relationalOperationCounter(parser);
+    
+        void argument_vm_to_asm(const int & index) {
+            assembly_file << "@ARG\n"
+                          << "D=M\n"
+                          << "@" << index << "\n"
+                          << "D=D+A\n";
         }
-        catch(...)
-        {
-            std::cerr << "[error] something went wrong while referencing the arithmetic dictionary.";
+    
+        void this_vm_to_asm(const int & index) {
+            assembly_file << "@THIS\n"
+                          << "D=M\n"
+                          << "@" << index << "\n"
+                          << "D=D+A\n";
         }
-    }
-
-    void writePushPop (const std::string & command, const std::string & segment, const int & index) {
-        if (command == "C_PUSH"){
-            push(segment, index);
-            return;
+    
+        void that_vm_to_asm(const int & index) {
+            assembly_file << "@THAT\n"
+                          << "D=M\n"
+                          << "@" << index << "\n"
+                          << "D=D+A\n";
         }
-
-        if (command == "C_POP"){
-            pop(segment, index);
-            return;
+    
+        void temp_vm_to_asm(const int & index) {
+            if (0 <= index && index < 8) {
+                const int location_shift = 5;
+                assembly_file << "@" << (index + location_shift) << "\n"
+                              << "D=A\n"; // for temp, the effective address is constant
+            }
+            else { 
+                std::cerr << "[error] accessing memory out of range in temp segment.\n";
+            }
         }
-    }
-
-    void close() {
-        if (assembly_file.is_open()) {
-            assembly_file.close();
+    
+        // for the constant segment, we don’t compute an address, we simply load the constant
+        void constant_vm_to_asm(const int & index) {
+            assembly_file << "@" << index << "\n"
+                          << "D=A\n";
         }
-    }
-
-    void code(Parser & parser){
-        while (parser.hasMoreCommands()) {
-            parser.advance();
-            if (!parser.current_command.empty()) {
-                if (parser.commandType() == "C_ARITHMETIC"){
-                    try { 
-                        writeArithmetic(parser, parser.arg1());
-                    }
-                    catch(...) {
-                        std::cerr << "[error] there was an issue writing the current arithmetic command.";
-                    }
+    
+        // for pointer segment: pointer 0 -> THIS (RAM[3]), pointer 1 -> THAT (RAM[4])
+        void pointer_vm_to_asm(const int & index) {
+            const int location_shift = 3;
+            assembly_file << "@" << (index + location_shift) << "\n"
+                          << "D=A\n"; // We compute the address
+        }
+    
+        // for static segment, compute the effective symbol
+        void static_vm_to_asm(const int & index) {
+            if (0 <= index && index < 239) {
+                assembly_file << "@" << vm_file_name << index << "\n"
+                              << "D=A\n"; // Compute the address of the static variable
+            }
+            else {
+                std::cerr << "[error] accessing memory out of range in static segment.\n";
+            }
+        }
+    
+        // map for computing effective addresses for a given segment
+        std::unordered_map<std::string, void (CodeWriter::*)(const int &)> memorySegmentator {
+            {"constant", &CodeWriter::constant_vm_to_asm},  // special: loads constant into D
+            {"local",    &CodeWriter::local_vm_to_asm},
+            {"argument", &CodeWriter::argument_vm_to_asm},
+            {"this",     &CodeWriter::this_vm_to_asm},
+            {"that",     &CodeWriter::that_vm_to_asm},
+            {"pointer",  &CodeWriter::pointer_vm_to_asm},
+            {"temp",     &CodeWriter::temp_vm_to_asm},
+            {"static",   &CodeWriter::static_vm_to_asm}
+        };
+    
+        std::unordered_map<std::string, std::string> arithmetic_dictionary {
+            {"add", "@SP\n"
+                    "AM=M-1\n"
+                    "D=M\n"
+                    "A=A-1\n"
+                    "M=D+M\n"},
+    
+            {"sub", "@SP\n"
+                    "AM=M-1\n"
+                    "D=M\n"
+                    "A=A-1\n"
+                    "M=M-D\n"},
+    
+            {"neg", "@SP\n"
+                    "A=M-1\n"
+                    "M=-M\n"},
+    
+            {"eq",  "@SP\n"
+                    "AM=M-1\n"
+                    "D=M\n"
+                    "A=A-1\n"
+                    "D=M-D\n"
+                    "@EQ_TRUE_"},  // label to be completed
+    
+            {"gt",  "@SP\n"
+                    "AM=M-1\n"
+                    "D=M\n"
+                    "A=A-1\n"
+                    "D=M-D\n"
+                    "@GT_TRUE_"},  // label to be completed
+    
+            {"lt",  "@SP\n"
+                    "AM=M-1\n"
+                    "D=M\n"
+                    "A=A-1\n"
+                    "D=M-D\n"
+                    "@LT_TRUE_"},  // label to be completed
+    
+            {"and", "@SP\n"
+                    "AM=M-1\n"
+                    "D=M\n"
+                    "A=A-1\n"
+                    "M=D&M\n"},
+    
+            {"or",  "@SP\n"
+                    "AM=M-1\n"
+                    "D=M\n"
+                    "A=A-1\n"
+                    "M=D|M\n"},
+    
+            {"not", "@SP\n"
+                    "A=M-1\n"
+                    "M=!M\n"}
+        };
+    
+        // counters for unique labels for relational commands
+        unsigned int EQ_COUNTER = 0;
+        unsigned int GT_COUNTER = 0;
+        unsigned int LT_COUNTER = 0;
+    
+        // completes the relational command code by appending unique label code
+        void relationalOperationCounter(const std::string & command) {
+            if (command == "eq") {
+                assembly_file << EQ_COUNTER << "\n"  // completes "@EQ_TRUE_<counter>"
+                              << "D;JEQ\n"
+                              << "@SP\n"
+                              << "A=M-1\n"
+                              << "M=0\n"
+                              << "@EQ_END" << EQ_COUNTER << "\n"
+                              << "0;JMP\n"
+                              << "(EQ_TRUE_" << EQ_COUNTER << ")\n"
+                              << "@SP\n"
+                              << "A=M-1\n"
+                              << "M=-1\n"
+                              << "(EQ_END" << EQ_COUNTER << ")\n";
+                ++EQ_COUNTER;
+            }
+            else if (command == "gt") {
+                assembly_file << GT_COUNTER << "\n"
+                              << "D;JGT\n"
+                              << "@SP\n"
+                              << "A=M-1\n"
+                              << "M=0\n"
+                              << "@GT_END" << GT_COUNTER << "\n"
+                              << "0;JMP\n"
+                              << "(GT_TRUE_" << GT_COUNTER << ")\n"
+                              << "@SP\n"
+                              << "A=M-1\n"
+                              << "M=-1\n"
+                              << "(GT_END" << GT_COUNTER << ")\n";
+                ++GT_COUNTER;
+            }
+            else if (command == "lt") {
+                assembly_file << LT_COUNTER << "\n"
+                              << "D;JLT\n"
+                              << "@SP\n"
+                              << "A=M-1\n"
+                              << "M=0\n"
+                              << "@LT_END" << LT_COUNTER << "\n"
+                              << "0;JMP\n"
+                              << "(LT_TRUE_" << LT_COUNTER << ")\n"
+                              << "@SP\n"
+                              << "A=M-1\n"
+                              << "M=-1\n"
+                              << "(LT_END" << LT_COUNTER << ")\n";
+                ++LT_COUNTER;
+            }
+        }
+    
+        // in push, we call the memorySegmentator helper to compute the effective address,
+        // then (if not "constant") we finish by loading the content from that address
+        void push(const std::string & segment, const int & index) {
+            try {
+                // for "constant" the helper already loads the constant into D
+                if (segment != "constant") {
+                    (this->*memorySegmentator.at(segment))(index); // computes effective address; D holds the address
+                    // now load the value from that address:
+                    assembly_file << "A=D\n"  // set A = effective address
+                                  << "D=M\n";  // D = *A
                 }
-
                 else {
-                    try {
-                        writePushPop(parser.commandType(), parser.arg1(), parser.arg2());
+                    (this->*memorySegmentator.at(segment))(index); // for constant, D = index
+                }
+                // push D onto the stack
+                assembly_file << "@SP\n"
+                              << "A=M\n"
+                              << "M=D\n"
+                              << "@SP\n"
+                              << "M=M+1\n";
+            }
+            catch (const std::exception & e) {
+                std::cerr << "[error] something went wrong while pushing to the stack: " << e.what();
+            }
+        }
+        
+        // in pop, we want to compute the effective address and store it in R13, then pop the value from the stack
+        void pop(const std::string & segment, const int & index) {
+            try {
+                // for segments that require computing the effective address
+                if (segment == "local" || segment == "argument" ||
+                    segment == "this"  || segment == "that") {
+                    (this->*memorySegmentator.at(segment))(index); // compute effective address; D holds it
+                    assembly_file << "@R13\n"
+                                  << "M=D\n";  // store the address in R13
+                }
+                // for segments that are directly addressable (temp, pointer, static)
+                else if (segment == "temp" || segment == "pointer" || segment == "static") {
+                    (this->*memorySegmentator.at(segment))(index); // compute the effective address; D holds it
+                    assembly_file << "@R13\n"
+                                  << "M=D\n";  // store in R13
+                }
+                // pop the value from the stack into D
+                assembly_file << "@SP\n"
+                              << "AM=M-1\n"
+                              << "D=M\n"
+                              << "@R13\n"
+                              << "A=M\n"
+                              << "M=D\n";
+            }
+            catch (const std::exception & e) {
+                std::cerr << "[error] something went wrong while popping from the stack: " << e.what();
+            }
+        }
+    
+    public:
+        // open the output file and trim the VM file name
+        CodeWriter(const std::string & vm_file, const std::string & asm_file) {
+            try {
+                assembly_file.open(asm_file);
+                if (!assembly_file.is_open()) {
+                    throw std::ios_base::failure("[error] unable to open output file.\n");
+                }
+                vm_file_name = vm_file;
+                vmFileNameTrimmer(vm_file_name);
+            } 
+            catch (const std::ios_base::failure & e) {
+                std::cerr << e.what() << "\n";
+            }
+        }
+    
+        ~CodeWriter() {
+            if (assembly_file.is_open()) {
+                assembly_file.close();
+            }
+        }
+    
+        // write an arithmetic command
+        void writeArithmetic(Parser & parser, const std::string & command) {
+            try {
+                if (arithmetic_dictionary.find(command) == arithmetic_dictionary.end()) {
+                    throw std::invalid_argument("Invalid arithmetic command");
+                }
+                if (command == "eq" || command == "gt" || command == "lt") {
+                    assembly_file << arithmetic_dictionary[command];
+                    relationalOperationCounter(command);
+                } else {
+                    assembly_file << arithmetic_dictionary[command];
+                }
+            }
+            catch(const std::exception & e) {
+                std::cerr << "[error] something went wrong while writing arithmetic command: " << e.what();
+            }
+        }
+    
+        // write a push or pop command
+        void writePushPop (const std::string & command, const std::string & segment, const int & index) {
+            if (command == "C_PUSH") {
+                push(segment, index);
+                return;
+            }
+            if (command == "C_POP") {
+                pop(segment, index);
+                return;
+            }
+        }
+    
+        // close the output file
+        void close() {
+            if (assembly_file.is_open()) {
+                assembly_file.close();
+            }
+        }
+    
+        // main driver: read commands from the parser and generate assembly
+        void code(Parser & parser) {
+            while (parser.hasMoreCommands()) {
+                parser.advance();
+                if (!parser.current_command.empty()) {
+                    if (parser.commandType() == "C_ARITHMETIC") {
+                        try { 
+                            writeArithmetic(parser, parser.arg1());
+                        }
+                        catch(...) {
+                            std::cerr << "[error] there was an issue writing the current arithmetic command.";
+                        }
                     }
-                    catch(...) {
-                        std::cerr << "[error] there was an issue writing the current command.";
+                    else {
+                        try {
+                            writePushPop(parser.commandType(), parser.arg1(), parser.arg2());
+                        }
+                        catch(...) {
+                            std::cerr << "[error] there was an issue writing the current command.";
+                        }
                     }
                 }
             }
+            close();
         }
-        close();
-    }
-};
+    };
+    
 
 int main()
 {
