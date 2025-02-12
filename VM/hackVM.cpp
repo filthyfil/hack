@@ -535,8 +535,11 @@ class CodeWriter {
 
 int main()
 {
-    std::string vm_file = "VM_test_commands.txt";
-    std::string asm_file = "asm_test_commands.txt";
+    std::string input_file_name;
+    std::cout << "What is the name of the input file? ";
+    std::cin >> input_file_name;
+    std::string vm_file = input_file_name;
+    std::string asm_file = "output.txt";
 
     Parser parser(vm_file);
     CodeWriter coder(vm_file, asm_file);
