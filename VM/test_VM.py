@@ -1,13 +1,12 @@
-# test_VM.py
 import subprocess
 
 def run_vm_translator(vm_file):
     """
     Run the hackVM executable and pass the input file name as user input.
     """
-    # Use subprocess to run the hackvm executable and pass the input file name
+    # Now using the correct path relative to the root directory
     process = subprocess.Popen(
-        ["./hackVM"],              # Command to run the executable
+        ["./VM/hackVM"],
         stdin=subprocess.PIPE,     # Pass input via stdin
         stdout=subprocess.PIPE,    # Capture stdout
         stderr=subprocess.PIPE,    # Capture stderr
