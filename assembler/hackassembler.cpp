@@ -426,25 +426,38 @@ void defineSymbols(Parser& parser, Symbol& encoder, unsigned int& number_of_memo
     parser.reset();
 }
 
-int main() {
-    std::string input_file_name;
-    std::cout << "Name of the input file: ";
-    std::cin >> input_file_name;
-    std::string binary_file = "output.txt";
-    std::string asm_file = input_file_name;
+int main(int argc, char* argv[]) {
+    // check if correct number of arguments provided
+    if (argc != 3) {
+        std::cerr << "Usage: " << argv[0] << " <input_file> <output_file>" << std::endl;
+        return 1;
+    }
 
-    unsigned int rom_address = 0;
-    unsigned int memory_address = 0;
+    // get input and output file paths from command line arguments
+    std::string input_file = argv[1];
+    std::string output_file = argv[2];
 
-    Parser parser(asm_file);
-    Coder coder;
-    Symbol encoder;
-    
-    defineLabels(parser, encoder, rom_address);
-    defineSymbols(parser, encoder, memory_address);
-    parse(asm_file, parser, encoder);
-    assemble(asm_file, binary_file, parser, coder, encoder);
+    try {
+        std::string asm_file = argv[1];
+        std::string binary_file = argv[2];
 
-    std::cout << "Done. Output written to " << binary_file << "\n";
+        unsigned int rom_address = 0;
+        unsigned int memory_address = 0;
+
+        Parser parser(asm_file);
+        Coder coder;
+        Symbol encoder;
+        
+        defineLabels(parser, encoder, rom_address);
+        defineSymbols(parser, encoder, memory_address);
+        parse(asm_file, parser, encoder);
+        assemble(asm_file, binary_file, parser, coder, encoder);
+
+        std::cout << "Done. Output written to " << binary_file << "\n";
+    }
+    catch (const std::exception & e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
     return 0;
 }

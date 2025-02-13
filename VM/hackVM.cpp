@@ -528,17 +528,33 @@ class CodeWriter {
     };
     
 
-int main()
-{
-    std::string input_file_name;
-    std::cout << "Name of the input file: ";
-    std::cin >> input_file_name;
-    std::string vm_file = input_file_name;
-    std::string asm_file = "output.txt";
+    int main(int argc, char* argv[]) {
+        // Check if correct number of arguments provided
+        if (argc != 3) {
+            std::cerr << "Usage: " << argv[0] << " <input_file> <output_file>" << std::endl;
+            return 1;
+        }
+    
+        // Get input and output file paths from command line arguments
+        std::string input_file = argv[1];
+        std::string output_file = argv[2];
+    
+        try {
+            std::string vm_file = argv[1];
+            std::string asm_file = argv[2];
 
-    Parser parser(vm_file);
-    CodeWriter coder(vm_file, asm_file);
+            Parser parser(vm_file);
+            CodeWriter coder(vm_file, asm_file);
 
-    parser.parse();
-    coder.code(parser);
-}
+            parser.parse();
+            coder.code(parser);
+        }
+        catch (const std::exception & e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+            return 1;
+        }
+    
+        return 0;
+    }
+
+    

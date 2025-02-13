@@ -4,21 +4,25 @@ def run_vm_translator(vm_file):
     """
     Run the hackVM executable and pass the input file name as user input.
     """
-    # Using relative to the root directory
-    process = subprocess.Popen(
-        ["./VM/hackVM"],
-        stdin=subprocess.PIPE,     # Pass input via stdin
-        stdout=subprocess.PIPE,    # Capture stdout
-        stderr=subprocess.PIPE,    # Capture stderr
-        text=True                  # Use text mode for input/output
+    # Compile the C++ code
+    compile_process = subprocess.run(
+        ["g++", "-o", "VM/hackVM", "VM/hackVM.cpp"],
+        capture_output=True,
+        text=True
     )
-    
-    # Pass the input file name to the program
-    stdout, stderr = process.communicate(input=vm_file + "\n")
+    if compile_process.returncode != 0:
+        raise RuntimeError(f"Error compiling VM Translator: {compile_process.stderr}")
+
+    # Run the compiled executable
+    process = subprocess.run(
+        ["./VM/hackVM", vm_file, "VM/output.txt"],
+        capture_output=True,
+        text=True
+    )
     
     # Check for errors
     if process.returncode != 0:
-        raise RuntimeError(f"Error running VM: {stderr}")
+        raise RuntimeError(f"Error running VM: {process.stderr}")
 
 def read_file(file_path):
     """

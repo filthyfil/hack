@@ -2,23 +2,31 @@ import subprocess
 
 def run_assembler(asm_file):
     """
-    Run the assembler executable and pass the input file name as user input.
+    Run the hackassembler executable and pass the input file name as user input.
     """
-    # Now using the correct path relative to the root directory
+    # Compile the C++ code
+    compile_process = subprocess.run(
+        ["g++", "-o", "assembler/hackassembler", "assembler/hackassembler.cpp"],
+        capture_output=True,
+        text=True
+    )
+    if compile_process.returncode != 0:
+        raise RuntimeError(f"Error compiling Assembler: {compile_process.stderr}")
+
+    # Run the compiled executable
     process = subprocess.Popen(
-        ["./assembler/hackassembler"],
-        stdin=subprocess.PIPE,     # Pass input via stdin
+        ["./assembler/hackassembler", asm_file, "assembler/output.txt"],
         stdout=subprocess.PIPE,    # Capture stdout
         stderr=subprocess.PIPE,    # Capture stderr
         text=True                  # Use text mode for input/output
     )
     
-    # Pass the input file name to the program
-    stdout, stderr = process.communicate(input=asm_file + "\n")
+    # Wait for the process to complete
+    stdout, stderr = process.communicate()
     
     # Check for errors
     if process.returncode != 0:
-        raise RuntimeError(f"Error running hackassembler: {stderr}")
+        raise RuntimeError(f"Error running Assembler: {stderr}")
 
 def read_file(file_path):
     """
@@ -28,11 +36,11 @@ def read_file(file_path):
         return file.read()
 
 def test_assembler():
-    # Define the input file and expected output file
+    # Define the input ASM file and expected output file
     asm_file = "assembler/asm_test_input.txt"
     expected_output_file = "assembler/binary_test_output.txt"
     actual_output_file = "assembler/output.txt"
-    
+
     # Run the assembler and pass the input file name
     run_assembler(asm_file)
 
@@ -41,10 +49,9 @@ def test_assembler():
     expected_output = read_file(expected_output_file)
 
     # Compare the output
-    assert actual_output.strip() == expected_output.strip(), "Test failed: Output does not match expected assembly code."
+    assert actual_output.strip() == expected_output.strip(), "Test failed: Output does not match expected binary code."
 
     print("All tests passed!")
 
 if __name__ == "__main__":
-    # Fixed to call the correct test function for the assembler
     test_assembler()
