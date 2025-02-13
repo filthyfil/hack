@@ -1,4 +1,4 @@
-name: Assembler Tests
+name: Assembler Test
 
 on:
   push:
