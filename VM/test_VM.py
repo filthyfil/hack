@@ -4,7 +4,7 @@ def run_vm_translator(vm_file):
     """
     Run the hackVM executable and pass the input file name as user input.
     """
-    # Now using the correct path relative to the root directory
+    # Using relative to the root directory
     process = subprocess.Popen(
         ["./VM/hackVM"],
         stdin=subprocess.PIPE,     # Pass input via stdin
@@ -29,9 +29,9 @@ def read_file(file_path):
 
 def test_vm_translator():
     # Define the input VM file and expected output file
-    vm_file = "VM_test_input.txt"
-    expected_output_file = "asm_test_output.txt"
-    actual_output_file = "output.txt"
+    asm_file = "assembler/asm_test_input.txt"
+    expected_output_file = "assembler/binary_test_output.txt"
+    actual_output_file = "assembler/output.txt"
 
     # Run the VM translator and pass the input file name
     run_vm_translator(vm_file)

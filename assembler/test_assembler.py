@@ -29,10 +29,10 @@ def read_file(file_path):
 
 def test_assembler():
     # Define the input file and expected output file
-    asm_file = "asm_test_input.txt"
-    expected_output_file = "binary_test_output.txt"
-    actual_output_file = "output.txt"
-
+    asm_file = "assembler/asm_test_input.txt"
+    expected_output_file = "assembler/binary_test_output.txt"
+    actual_output_file = "assembler/output.txt"
+    
     # Run the assembler and pass the input file name
     run_assembler(asm_file)
 
