@@ -25,4 +25,4 @@ jobs:
           g++ -o hackVM hackVM.cpp
       - name: Run tests
         run: |
-          python test_hackVM.py
+          python test_VM.py

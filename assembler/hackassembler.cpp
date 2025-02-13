@@ -427,21 +427,24 @@ void defineSymbols(Parser& parser, Symbol& encoder, unsigned int& number_of_memo
 }
 
 int main() {
-    const std::string input_file = "assembly_code.txt";
-    const std::string output_file = "output.txt";
+    std::string input_file_name;
+    std::cout << "Name of the input file: ";
+    std::cin >> input_file_name;
+    std::string binary_file = "output.txt";
+    std::string asm_file = input_file_name;
 
     unsigned int rom_address = 0;
     unsigned int memory_address = 0;
 
-    Parser parser(input_file);
+    Parser parser(asm_file);
     Coder coder;
     Symbol encoder;
     
     defineLabels(parser, encoder, rom_address);
     defineSymbols(parser, encoder, memory_address);
-    parse(input_file, parser, encoder);
-    assemble(input_file, output_file, parser, coder, encoder);
+    parse(asm_file, parser, encoder);
+    assemble(asm_file, binary_file, parser, coder, encoder);
 
-    std::cout << "Done. Output written to " << output_file << "\n";
+    std::cout << "Done. Output written to " << binary_file << "\n";
     return 0;
 }

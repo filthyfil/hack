@@ -1,4 +1,4 @@
-# test_hackvm.py
+# test_VM.py
 import subprocess
 
 def run_vm_translator(vm_file):
@@ -19,7 +19,7 @@ def run_vm_translator(vm_file):
     
     # Check for errors
     if process.returncode != 0:
-        raise RuntimeError(f"Error running hackvm: {stderr}")
+        raise RuntimeError(f"Error running VM: {stderr}")
 
 def read_file(file_path):
     """
@@ -30,8 +30,8 @@ def read_file(file_path):
 
 def test_vm_translator():
     # Define the input VM file and expected output file
-    vm_file = "VM_test_commands.txt"
-    expected_output_file = "asm_test_commands.txt"
+    vm_file = "VM_test_input.txt"
+    expected_output_file = "asm_test_output.txt"
     actual_output_file = "output.txt"
 
     # Run the VM translator and pass the input file name
