@@ -29,9 +29,9 @@ def read_file(file_path):
 
 def test_vm_translator():
     # Define the input VM file and expected output file
-    asm_file = "assembler/asm_test_input.txt"
-    expected_output_file = "assembler/binary_test_output.txt"
-    actual_output_file = "assembler/output.txt"
+    vm_file = "VM/VM_test_input.txt"
+    expected_output_file = "VM/asm_test_output.txt"
+    actual_output_file = "VM/output.txt"
 
     # Run the VM translator and pass the input file name
     run_vm_translator(vm_file)
