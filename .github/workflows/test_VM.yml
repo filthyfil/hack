@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  test:
+  test-vm-translator:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -20,9 +20,13 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-      - name: Compile C++ code
+      - name: Navigate to VM directory
         run: |
-          g++ -o hackVM hackVM.cpp
-      - name: Run tests
+          cd VM
+          ls
+      - name: Compile C++ code (VM Translator)
         run: |
-          python test_VM.py
+          g++ -o VM/hackVM VM/hackVM.cpp
+      - name: Run VM Translator tests
+        run: |
+          python VM/test_VM.py
