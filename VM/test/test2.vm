@@ -1,0 +1,9 @@
+push constant 10
+push constant 5
+gt
+push constant 5
+push constant 10
+lt
+push constant 7
+push constant 7
+eq

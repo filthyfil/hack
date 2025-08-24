@@ -18,12 +18,22 @@ so I can program the computer without an OS.
 This program is an assembler written in c++. 
 It translates assembly into machine code.
 
-
- - hackVM.cpp ( in progress )
-This is a VM similar to JVM
-
+ - hackVM2.cpp
+This is a VM translator similar to JVM that converts
+VM code to Hack assembly. Supports full VM command set
+including arithmetic, memory access, program flow, and
+function calls.
 
  - hackcompiler ( not started )
 
+ - hackOS ( not started )
 
- - hackOS ( not started ) 
+### Web Applications:
+ - streamlit_apps/ ( completed )
+User-friendly web interfaces for the development tools:
+  * Main Dashboard - Central hub for all tools
+  * Assembler App - Convert assembly to machine code
+  * VM Translator App - Convert VM code to assembly
+  * Built-in examples, code analysis, and download functionality
+
+Run with: `cd streamlit_apps && streamlit run main_app.py` 

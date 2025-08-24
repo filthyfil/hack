@@ -1,5 +1,5 @@
 // hackVM.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+// Warning: This file is not working as expected.
 
 #include <iostream>
 #include <string>

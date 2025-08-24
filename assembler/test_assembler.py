@@ -15,7 +15,7 @@ def run_assembler(asm_file):
 
     # Run the compiled executable
     process = subprocess.Popen(
-        ["./assembler/hackassembler", asm_file, "assembler/output.txt"],
+        ["./assembler/checkassembler", asm_file, "assembler/output.txt"],
         stdout=subprocess.PIPE,    # Capture stdout
         stderr=subprocess.PIPE,    # Capture stderr
         text=True                  # Use text mode for input/output

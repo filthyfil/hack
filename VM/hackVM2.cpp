@@ -1,11 +1,14 @@
-// hackVM2.cpp : Beginning implementation for Chapter 8 part 2 of the VM.
-// This file extends the part 1 translator with program flow and function commands.
+// hackVM2_fixed.cpp
+// Translates Hack VM files to Hack Assembly code.
+// Handles both single .vm files and directories containing multiple .vm files.
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
+#include <filesystem>
 
 class Parser {
 private:
@@ -13,9 +16,9 @@ private:
         "C_PUSH", "C_POP", "C_FUNCTION", "C_CALL"
     };
     std::unordered_map<std::string, std::string> defined_command_types {
-        {"add", "C_ARITHMETIC"}, {"sub", "C_ARITHMETIC"}, {"neg", "C_ARITHMETIC"},
-        {"eq", "C_ARITHMETIC"},  {"gt", "C_ARITHMETIC"},  {"lt", "C_ARITHMETIC"},
-        {"and", "C_ARITHMETIC"}, {"or", "C_ARITHMETIC"},  {"not", "C_ARITHMETIC"},
+        {"add", "C_ARITHMETIC"},  {"sub", "C_ARITHMETIC"},  {"neg", "C_ARITHMETIC"},
+        {"eq", "C_ARITHMETIC"},   {"gt", "C_ARITHMETIC"},   {"lt", "C_ARITHMETIC"},
+        {"and", "C_ARITHMETIC"},  {"or", "C_ARITHMETIC"},   {"not", "C_ARITHMETIC"},
         {"push", "C_PUSH"},       {"pop", "C_POP"},         {"label", "C_LABEL"},
         {"goto", "C_GOTO"},       {"if-goto", "C_IF"},      {"function", "C_FUNCTION"},
         {"call", "C_CALL"},       {"return", "C_RETURN"}
@@ -28,11 +31,13 @@ public:
     explicit Parser(const std::string &file) {
         vm_file.open(file);
         if (!vm_file.is_open()) {
-            throw std::runtime_error("[error] unable to open input VM file");
+            throw std::runtime_error("[error] unable to open input VM file: " + file);
         }
     }
 
-    bool hasMoreCommands() { return !vm_file.eof(); }
+    bool hasMoreCommands() {
+        return vm_file.peek() != EOF;
+    }
 
     static std::string trim(const std::string &s) {
         auto start = s.find_first_not_of(" \t\n\r");
@@ -60,7 +65,12 @@ public:
 
     std::string commandType() {
         if (current_command.empty()) return "NULL";
-        return defined_command_types.at(commandTokenizer());
+        try {
+            return defined_command_types.at(commandTokenizer());
+        } catch (const std::out_of_range& oor) {
+            std::cerr << "Unknown command: " << commandTokenizer() << std::endl;
+            return "NULL";
+        }
     }
 
     std::string arg1() {
@@ -84,122 +94,239 @@ public:
 };
 
 class CodeWriter {
-    std::string file_name;
+    std::string file_name_base; // Stores base name like "Sys" for static variables
+    std::string current_function_name; // Stores current function for labels
     std::ofstream out;
     unsigned int label_counter = 0;
-
-    void fileNameTrim(std::string &name) {
-        auto pos = name.find('.');
-        if (pos != std::string::npos) name = name.substr(0, pos + 1);
-    }
 
     void push(const std::string &segment, int index) {
         static const std::unordered_map<std::string, std::string> base {
             {"local", "LCL"}, {"argument", "ARG"}, {"this", "THIS"}, {"that", "THAT"}
         };
         if (segment == "constant") {
-            out << "@" << index << "\nD=A\n";
+            out << "@" << index << "\n"
+                << "D=A\n";
         } else if (segment == "temp") {
-            out << "@" << 5 + index << "\nD=M\n";
+            out << "@" << 5 + index << "\n"
+                << "D=M\n";
         } else if (segment == "pointer") {
-            out << "@" << 3 + index << "\nD=M\n";
+            out << "@" << 3 + index << "\n"
+                << "D=M\n";
         } else if (segment == "static") {
-            out << "@" << file_name << index << "\nD=M\n";
+            out << "@" << file_name_base << "." << index << "\n"
+                << "D=M\n";
         } else {
-            out << "@" << base.at(segment) << "\nD=M\n@" << index << "\nA=D+A\nD=M\n";
+            out << "@" << base.at(segment) << "\n"
+                << "D=M\n"
+                << "@" << index << "\n"
+                << "A=D+A\n"
+                << "D=M\n";
         }
-        out << "@SP\nA=M\nM=D\n@SP\nM=M+1\n";
+        out << "@SP\n"
+            << "A=M\n"
+            << "M=D\n"
+            << "@SP\n"
+            << "M=M+1\n";
     }
 
     void pop(const std::string &segment, int index) {
         static const std::unordered_map<std::string, std::string> base {
             {"local", "LCL"}, {"argument", "ARG"}, {"this", "THIS"}, {"that", "THAT"}
         };
-        if (segment == "temp") {
-            out << "@SP\nAM=M-1\nD=M\n@" << 5 + index << "\nM=D\n";
-        } else if (segment == "pointer") {
-            out << "@SP\nAM=M-1\nD=M\n@" << 3 + index << "\nM=D\n";
-        } else if (segment == "static") {
-            out << "@SP\nAM=M-1\nD=M\n@" << file_name << index << "\nM=D\n";
+        if (segment == "temp" || segment == "pointer" || segment == "static") {
+            std::string symbol = (segment == "temp") ? std::to_string(5 + index) :
+                                 (segment == "pointer") ? std::to_string(3 + index) :
+                                 (file_name_base + "." + std::to_string(index));
+            out << "@SP\n"
+                << "AM=M-1\n"
+                << "D=M\n"
+                << "@" << symbol << "\n"
+                << "M=D\n";
         } else {
-            out << "@" << base.at(segment) << "\nD=M\n@" << index
-                << "\nD=D+A\n@R13\nM=D\n@SP\nAM=M-1\nD=M\n@R13\nA=M\nM=D\n";
+            out << "@" << base.at(segment) << "\n"
+                << "D=M\n"
+                << "@" << index << "\n"
+                << "D=D+A\n"
+                << "@R13\n"
+                << "M=D\n"
+                << "@SP\n"
+                << "AM=M-1\n"
+                << "D=M\n"
+                << "@R13\n"
+                << "A=M\n"
+                << "M=D\n";
         }
     }
 
 public:
-    CodeWriter(const std::string &vm, const std::string &asm_file) {
+    explicit CodeWriter(const std::string &asm_file) {
         out.open(asm_file);
-        file_name = vm;
-        fileNameTrim(file_name);
-    }
-    ~CodeWriter() { if (out.is_open()) out.close(); }
-
-    void writeArithmetic(const std::string &cmd) {
-        static const std::unordered_map<std::string, std::string> ops {
-            {"add", "@SP\nAM=M-1\nD=M\nA=A-1\nM=D+M\n"},
-            {"sub", "@SP\nAM=M-1\nD=M\nA=A-1\nM=M-D\n"},
-            {"neg", "@SP\nA=M-1\nM=-M\n"},
-            {"and", "@SP\nAM=M-1\nD=M\nA=A-1\nM=D&M\n"},
-            {"or",  "@SP\nAM=M-1\nD=M\nA=A-1\nM=D|M\n"},
-            {"not", "@SP\nA=M-1\nM=!M\n"}
-        };
-        if (cmd == "eq" || cmd == "gt" || cmd == "lt") {
-            std::string jmp = (cmd == "eq") ? "JEQ" : (cmd == "gt" ? "JGT" : "JLT");
-            out << "@SP\nAM=M-1\nD=M\nA=A-1\nD=M-D\n@BOOL_" << label_counter
-                << "\nD;" << jmp << "\n@SP\nA=M-1\nM=0\n@END_" << label_counter
-                << "\n0;JMP\n(BOOL_" << label_counter << ")\n@SP\nA=M-1\nM=-1\n(END_"
-                << label_counter << ")\n";
-            ++label_counter;
-        } else {
-            out << ops.at(cmd);
+        if (!out.is_open()) {
+            throw std::runtime_error("[error] unable to create output asm file");
         }
     }
+    ~CodeWriter() { if (out.is_open()) out.close(); }
+    
+    void setFileName(const std::string& vm_filepath) {
+        namespace fs = std::filesystem;
+        fs::path p(vm_filepath);
+        this->file_name_base = p.stem().string();
+    }
 
+    void writeInit() {
+        out << "// Bootstrap Code\n"
+            << "@256\n"
+            << "D=A\n"
+            << "@SP\n"
+            << "M=D\n";
+        writeCall("Sys.init", 0);
+    }
+
+    void writeArithmetic(const std::string &cmd) {
+        if (cmd == "add") {
+            out << "@SP\n"
+                << "AM=M-1\n"
+                << "D=M\n"
+                << "A=A-1\n"
+                << "M=D+M\n";
+        } else if (cmd == "sub") {
+            out << "@SP\n"
+                << "AM=M-1\n"
+                << "D=M\n"
+                << "A=A-1\n"
+                << "M=M-D\n";
+        } else if (cmd == "neg") {
+            out << "@SP\n"
+                << "A=M-1\n"
+                << "M=-M\n";
+        } else if (cmd == "and") {
+            out << "@SP\n"
+                << "AM=M-1\n"
+                << "D=M\n"
+                << "A=A-1\n"
+                << "M=D&M\n";
+        } else if (cmd == "or") {
+            out << "@SP\n"
+                << "AM=M-1\n"
+                << "D=M\n"
+                << "A=A-1\n"
+                << "M=D|M\n";
+        } else if (cmd == "not") {
+            out << "@SP\n"
+                << "A=M-1\n"
+                << "M=!M\n";
+        } else if (cmd == "eq" || cmd == "gt" || cmd == "lt") {
+            std::string jmp = (cmd == "eq") ? "JEQ" : (cmd == "gt" ? "JGT" : "JLT");
+            std::string label_true = "BOOL_TRUE_" + std::to_string(label_counter);
+            std::string label_end = "BOOL_END_" + std::to_string(label_counter);
+            label_counter++;
+            out << "@SP\n"
+                << "AM=M-1\n"
+                << "D=M\n"
+                << "A=A-1\n"
+                << "D=M-D\n"
+                << "@" << label_true << "\n"
+                << "D;" << jmp << "\n"
+                << "@SP\n"
+                << "A=M-1\n"
+                << "M=0\n" // false
+                << "@" << label_end << "\n"
+                << "0;JMP\n"
+                << "(" << label_true << ")\n"
+                << "@SP\n"
+                << "A=M-1\n"
+                << "M=-1\n" // true
+                << "(" << label_end << ")\n";
+        }
+    }
     void writePushPop(const std::string &type, const std::string &seg, int idx) {
+        out << "// " << (type == "C_PUSH" ? "push" : "pop") << " " << seg << " " << idx << "\n";
         if (type == "C_PUSH") push(seg, idx);
         else if (type == "C_POP") pop(seg, idx);
     }
-
-    void writeLabel(const std::string &label) { out << "(" << label << ")\n"; }
-
+    void writeLabel(const std::string &label) { out << "(" << current_function_name << "$" << label << ")\n"; }
     void writeGoto(const std::string &label) {
-        out << "@" << label << "\n0;JMP\n";
+        out << "@" << current_function_name << "$" << label << "\n"
+            << "0;JMP\n";
     }
-
     void writeIf(const std::string &label) {
-        out << "@SP\nAM=M-1\nD=M\n@" << label << "\nD;JNE\n";
+        out << "@SP\n"
+            << "AM=M-1\n"
+            << "D=M\n"
+            << "@" << current_function_name << "$" << label << "\n"
+            << "D;JNE\n";
     }
-
     void writeFunction(const std::string &name, int nLocals) {
+        current_function_name = name;
         out << "(" << name << ")\n";
         for (int i = 0; i < nLocals; ++i) {
-            out << "@0\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";
+            push("constant", 0);
         }
     }
-
     void writeCall(const std::string &name, int nArgs) {
-        std::string ret = "RET_" + std::to_string(label_counter++);
-        out << "@" << ret << "\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n"; // push return
-        out << "@LCL\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";           // push LCL
-        out << "@ARG\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";           // push ARG
-        out << "@THIS\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";         // push THIS
-        out << "@THAT\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";         // push THAT
-        out << "@SP\nD=M\n@" << nArgs + 5 << "\nD=D-A\n@ARG\nM=D\n";  // ARG=SP-n-5
-        out << "@SP\nD=M\n@LCL\nM=D\n";                               // LCL=SP
-        out << "@" << name << "\n0;JMP\n(" << ret << ")\n";             // goto function
+        std::string ret_label = name + "$ret." + std::to_string(label_counter++);
+        out << "// call " << name << " " << nArgs << "\n";
+        out << "@" << ret_label << "\n"
+            << "D=A\n"
+            << "@SP\n"
+            << "A=M\n"
+            << "M=D\n"
+            << "@SP\n"
+            << "M=M+1\n";
+        for (const char* seg : {"LCL", "ARG", "THIS", "THAT"}) {
+            out << "@" << seg << "\n"
+                << "D=M\n"
+                << "@SP\n"
+                << "A=M\n"
+                << "M=D\n"
+                << "@SP\n"
+                << "M=M+1\n";
+        }
+        out << "@SP\n"
+            << "D=M\n"
+            << "@" << (nArgs + 5) << "\n"
+            << "D=D-A\n"
+            << "@ARG\n"
+            << "M=D\n"
+            << "@SP\n"
+            << "D=M\n"
+            << "@LCL\n"
+            << "M=D\n"
+            << "@" << name << "\n"
+            << "0;JMP\n"
+            << "(" << ret_label << ")\n";
     }
-
     void writeReturn() {
-        out << "@LCL\nD=M\n@R13\nM=D\n";               // FRAME = LCL
-        out << "@5\nA=D-A\nD=M\n@R14\nM=D\n";         // RET = *(FRAME-5)
-        out << "@SP\nAM=M-1\nD=M\n@ARG\nA=M\nM=D\n";   // *ARG = pop()
-        out << "@ARG\nD=M+1\n@SP\nM=D\n";               // SP = ARG+1
-        out << "@R13\nAM=M-1\nD=M\n@THAT\nM=D\n";       // THAT = *(FRAME-1)
-        out << "@R13\nAM=M-1\nD=M\n@THIS\nM=D\n";       // THIS = *(FRAME-2)
-        out << "@R13\nAM=M-1\nD=M\n@ARG\nM=D\n";        // ARG = *(FRAME-3)
-        out << "@R13\nAM=M-1\nD=M\n@LCL\nM=D\n";        // LCL = *(FRAME-4)
-        out << "@R14\nA=M\n0;JMP\n";                     // goto RET
+        out << "// return\n";
+        out << "@LCL\n"      // FRAME = LCL (R13)
+            << "D=M\n"
+            << "@R13\n"
+            << "M=D\n"
+            << "@5\n"        // RET = *(FRAME-5) (R14)
+            << "A=D-A\n"
+            << "D=M\n"
+            << "@R14\n"
+            << "M=D\n"
+            << "@SP\n"       // *ARG = pop()
+            << "AM=M-1\n"
+            << "D=M\n"
+            << "@ARG\n"
+            << "A=M\n"
+            << "M=D\n"
+            << "@ARG\n"      // SP = ARG+1
+            << "D=M+1\n"
+            << "@SP\n"
+            << "M=D\n";
+        for (const char* seg : {"THAT", "THIS", "ARG", "LCL"}) {
+            out << "@R13\n"
+                << "AM=M-1\n"
+                << "D=M\n"
+                << "@" << seg << "\n"
+                << "M=D\n";
+        }
+        out << "@R14\n"      // goto RET
+            << "A=M\n"
+            << "0;JMP\n";
     }
 
     void close() { if (out.is_open()) out.close(); }
@@ -227,24 +354,64 @@ public:
                 writeReturn();
             }
         }
-        close();
     }
 };
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <input_file> <output_file>\n";
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <input_file.vm | input_directory>\n";
         return 1;
     }
 
+    namespace fs = std::filesystem;
+    fs::path input_path(argv[1]);
+    fs::path output_path;
+    std::vector<fs::path> vm_files;
+    bool is_dir = false;
+
+    if (fs::is_directory(input_path)) {
+        is_dir = true;
+        output_path = input_path / (input_path.filename().string() + ".asm");
+        for (const auto &entry : fs::directory_iterator(input_path)) {
+            if (entry.is_regular_file() && entry.path().extension() == ".vm") {
+                vm_files.push_back(entry.path());
+            }
+        }
+    } else if (fs::is_regular_file(input_path) && input_path.extension() == ".vm") {
+        output_path = input_path;
+        output_path.replace_extension(".asm");
+        vm_files.push_back(input_path);
+    } else {
+        std::cerr << "[Error] Input must be a .vm file or a directory.\n";
+        return 1;
+    }
+
+    if (vm_files.empty()) {
+        std::cerr << "[Error] No .vm files found to translate.\n";
+        return 1;
+    }
+    
     try {
-        Parser parser(argv[1]);
-        CodeWriter writer(argv[1], argv[2]);
-        writer.code(parser);
+        CodeWriter writer(output_path.string());
+
+        if (is_dir) {
+            writer.writeInit();
+        }
+
+        for (const auto &vm_file : vm_files) {
+            std::cout << "Translating: " << vm_file.string() << std::endl;
+            writer.setFileName(vm_file.string());
+            Parser parser(vm_file.string());
+            writer.code(parser);
+        }
+
+        writer.close();
+
     } catch (const std::exception &e) {
         std::cerr << e.what() << "\n";
         return 1;
     }
+
+    std::cout << "Translation successful. Output written to: " << output_path.string() << std::endl;
     return 0;
 }
-
