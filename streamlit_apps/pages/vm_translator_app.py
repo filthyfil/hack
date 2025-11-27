@@ -24,38 +24,54 @@ def compile_vm_translator():
 def translate_vm_to_asm(vm_code, filename="input"):
     """Translate VM code to assembly using the compiled translator"""
     try:
-        # Create temporary files
+        # Create a temporary VM input file (translator produces .asm next to it)
         with tempfile.NamedTemporaryFile(mode='w', suffix='.vm', delete=False) as vm_file:
             vm_file.write(vm_code)
             vm_file_path = vm_file.name
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.asm', delete=False) as asm_file:
-            asm_file_path = asm_file.name
-        
-        # Run the translator
+
+        # Run the translator binary (similar to assembler_app: binary is at ../VM/hackVM2
+        # relative to the streamlit_apps working directory)
         result = subprocess.run(
-            ["../VM/hackVM2", vm_file_path, asm_file_path],
+            ["../VM/hackVM2", vm_file_path],
             capture_output=True,
             text=True,
             cwd="."
         )
-        
-        # Clean up temp files
-        os.unlink(vm_file_path)
-        
+
+        # Always remove the temporary VM input file
+        try:
+            os.unlink(vm_file_path)
+        except Exception:
+            pass
+
         if result.returncode != 0:
             st.error(f"Translation failed: {result.stderr}")
+            # Remove any produced .asm file if present
+            asm_path = vm_file_path[:-3] + ".asm"
+            try:
+                if os.path.exists(asm_path):
+                    os.unlink(asm_path)
+            except Exception:
+                pass
             return None
-        
-        # Read the output
-        with open(asm_file_path, 'r') as f:
+
+        # Read the .asm file the translator produces next to the input .vm
+        asm_path = vm_file_path[:-3] + ".asm"
+        if not os.path.exists(asm_path):
+            st.error("Translation did not produce an output .asm file.")
+            return None
+
+        with open(asm_path, 'r') as f:
             assembly_output = f.read()
-        
-        # Clean up output file
-        os.unlink(asm_file_path)
-        
+
+        # Clean up produced asm
+        try:
+            os.unlink(asm_path)
+        except Exception:
+            pass
+
         return assembly_output
-        
+
     except Exception as e:
         st.error(f"Translation error: {str(e)}")
         return None

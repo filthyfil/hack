@@ -1,4 +1,4 @@
-// hackVM2_fixed.cpp
+// hackVM2.cpp
 // Translates Hack VM files to Hack Assembly code.
 // Handles both single .vm files and directories containing multiple .vm files.
 
@@ -24,6 +24,13 @@ private:
         {"call", "C_CALL"},       {"return", "C_RETURN"}
     };
 
+    static std::string trim(const std::string &s) {
+        auto start = s.find_first_not_of(" \t\n\r");
+        if (start == std::string::npos) return "";
+        auto end = s.find_last_not_of(" \t\n\r");
+        return s.substr(start, end - start + 1);
+    }
+
 public:
     std::string current_command;
     std::ifstream vm_file;
@@ -35,15 +42,13 @@ public:
         }
     }
 
+    ~Parser() {
+        if (vm_file.is_open())
+            vm_file.close();
+        }
+
     bool hasMoreCommands() {
         return vm_file.peek() != EOF;
-    }
-
-    static std::string trim(const std::string &s) {
-        auto start = s.find_first_not_of(" \t\n\r");
-        if (start == std::string::npos) return "";
-        auto end = s.find_last_not_of(" \t\n\r");
-        return s.substr(start, end - start + 1);
     }
 
     void advance() {
@@ -75,13 +80,13 @@ public:
 
     std::string arg1() {
         if (commandType() == "C_ARITHMETIC") return commandTokenizer();
-        if (commandType() != "C_RETURN") {
+        else if (commandType() != "C_RETURN") {
             auto pos = current_command.find(' ');
             std::string rest = current_command.substr(pos + 1);
             pos = rest.find(' ');
             return rest.substr(0, pos);
         }
-        throw std::invalid_argument("arg1() called on return command");
+        throw std::invalid_argument("arg1() called on return or invalid command");
     }
 
     int arg2() {
