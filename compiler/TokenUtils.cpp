@@ -2,28 +2,28 @@
 
 std::string keywordToString(KeyWord kw) {
     switch (kw) {
-        case KeyWord::k_CLASS:       return "class";
-        case KeyWord::k_METHOD:      return "method";
-        case KeyWord::k_FUNCTION:    return "function";
-        case KeyWord::k_CONSTRUCTOR: return "constructor";
-        case KeyWord::k_INT:         return "int";
-        case KeyWord::k_BOOLEAN:     return "boolean";
-        case KeyWord::k_CHAR:        return "char";
-        case KeyWord::k_VOID:        return "void";
-        case KeyWord::k_VAR:         return "var";
-        case KeyWord::k_STATIC:      return "static";
-        case KeyWord::k_FIELD:       return "field";
-        case KeyWord::k_LET:         return "let";
-        case KeyWord::k_DO:          return "do";
-        case KeyWord::k_IF:          return "if";
-        case KeyWord::k_ELSE:        return "else";
-        case KeyWord::k_WHILE:       return "while";
-        case KeyWord::k_RETURN:      return "return";
-        case KeyWord::k_TRUE:        return "true";
-        case KeyWord::k_FALSE:       return "false";
-        case KeyWord::k_NULL:        return "null";
-        case KeyWord::k_THIS:        return "this";
-        default:                     return "invalid";
+        case KeyWord::kw_CLASS:       return "class";
+        case KeyWord::kw_METHOD:      return "method";
+        case KeyWord::kw_FUNCTION:    return "function";
+        case KeyWord::kw_CONSTRUCTOR: return "constructor";
+        case KeyWord::kw_INT:         return "int";
+        case KeyWord::kw_BOOLEAN:     return "boolean";
+        case KeyWord::kw_CHAR:        return "char";
+        case KeyWord::kw_VOID:        return "void";
+        case KeyWord::kw_VAR:         return "var";
+        case KeyWord::kw_STATIC:      return "static";
+        case KeyWord::kw_FIELD:       return "field";
+        case KeyWord::kw_LET:         return "let";
+        case KeyWord::kw_DO:          return "do";
+        case KeyWord::kw_IF:          return "if";
+        case KeyWord::kw_ELSE:        return "else";
+        case KeyWord::kw_WHILE:       return "while";
+        case KeyWord::kw_RETURN:      return "return";
+        case KeyWord::kw_TRUE:        return "true";
+        case KeyWord::kw_FALSE:       return "false";
+        case KeyWord::kw_NULL:        return "null";
+        case KeyWord::kw_THIS:        return "this";
+        default:                      return "invalid";
     }
 }
 
