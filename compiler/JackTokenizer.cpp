@@ -32,7 +32,9 @@ static std::unordered_map<std::string, KeyWord> defined_keywords = {
     {"this", KeyWord::kw_THIS}
 };
 
-JackTokenizer::JackTokenizer(const std::string& file) : jack_file_name(file){ 
+JackTokenizer::JackTokenizer(const std::string& file) : 
+    jack_file_name(file),
+    line_number{0} { 
     // open input file
     jack_file.open(file);
     if (!jack_file.is_open()) {
@@ -210,6 +212,7 @@ std::string JackTokenizer::tokenizer() {
     while (current_line.empty()) {
         if (!std::getline(jack_file, current_line))
             return {}; // EOF
+        ++line_number;
         token_builder.clear();
         current_line = trim(current_line);
         commentAnalyzer();

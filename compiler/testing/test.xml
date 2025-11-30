@@ -1,35 +1,35 @@
 <class>
 	<keyword> class </keyword>
-	<identifier> Square </identifier>
+	<identifier name="Square" category="class" index="-1" usage="declared"></identifier>
 	<symbol> { </symbol>
 	<classVarDec>
 		<keyword> field </keyword>
 		<keyword> int </keyword>
-		<identifier> x </identifier>
+		<identifier name="x" category="field" index="0" usage="declared"></identifier>
 		<symbol> , </symbol>
-		<identifier> y </identifier>
+		<identifier name="y" category="field" index="1" usage="declared"></identifier>
 		<symbol> ; </symbol>
 	</classVarDec>
 	<classVarDec>
 		<keyword> field </keyword>
 		<keyword> int </keyword>
-		<identifier> size </identifier>
+		<identifier name="size" category="field" index="2" usage="declared"></identifier>
 		<symbol> ; </symbol>
 	</classVarDec>
 	<subroutineDec>
 		<keyword> constructor </keyword>
-		<identifier> Square </identifier>
-		<identifier> new </identifier>
+		<identifier name="Square" category="class" index="-1" usage="used"></identifier>
+		<identifier name="new" category="subroutine" index="-1" usage="declared"></identifier>
 		<symbol> ( </symbol>
 		<parameterList>
 			<keyword> int </keyword>
-			<identifier> Ax </identifier>
+			<identifier name="Ax" category="arg" index="0" usage="declared"></identifier>
 			<symbol> , </symbol>
 			<keyword> int </keyword>
-			<identifier> Ay </identifier>
+			<identifier name="Ay" category="arg" index="1" usage="declared"></identifier>
 			<symbol> , </symbol>
 			<keyword> int </keyword>
-			<identifier> Asize </identifier>
+			<identifier name="Asize" category="arg" index="2" usage="declared"></identifier>
 		</parameterList>
 		<symbol> ) </symbol>
 		<subroutineBody>
@@ -37,51 +37,55 @@
 			<statements>
 				<letStatement>
 					<keyword> let </keyword>
-					<identifier> x </identifier>
+					<identifier name="x" category="field" index="0" usage="used"></identifier>
 					<symbol> = </symbol>
 					<expression>
 						<term>
-							<identifier> Ax </identifier>
+							<identifier name="Ax" category="arg" index="0" usage="used"></identifier>
 						</term>
 					</expression>
 					<symbol> ; </symbol>
 				</letStatement>
 				<letStatement>
 					<keyword> let </keyword>
-					<identifier> y </identifier>
+					<identifier name="y" category="field" index="1" usage="used"></identifier>
 					<symbol> = </symbol>
 					<expression>
 						<term>
-							<identifier> Ay </identifier>
+							<identifier name="Ay" category="arg" index="1" usage="used"></identifier>
 						</term>
 					</expression>
 					<symbol> ; </symbol>
 				</letStatement>
 				<letStatement>
 					<keyword> let </keyword>
-					<identifier> size </identifier>
+					<identifier name="size" category="field" index="2" usage="used"></identifier>
 					<symbol> = </symbol>
 					<expression>
 						<term>
-							<identifier> Asize </identifier>
+							<identifier name="Asize" category="arg" index="2" usage="used"></identifier>
 						</term>
 					</expression>
 					<symbol> ; </symbol>
 				</letStatement>
 				<doStatement>
 					<keyword> do </keyword>
-					<identifier> draw </identifier>
-					<symbol> ( </symbol>
-					<expressionList>
-					</expressionList>
-					<symbol> ) </symbol>
+					<expression>
+						<term>
+							<identifier name="draw" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
 					<symbol> ; </symbol>
 				</doStatement>
 				<returnStatement>
 					<keyword> return </keyword>
 					<expression>
 						<term>
-							<identifier> x </identifier>
+							<identifier name="x" category="field" index="0" usage="used"></identifier>
 						</term>
 					</expression>
 					<symbol> ; </symbol>
@@ -93,7 +97,7 @@
 	<subroutineDec>
 		<keyword> method </keyword>
 		<keyword> void </keyword>
-		<identifier> dispose </identifier>
+		<identifier name="dispose" category="subroutine" index="-1" usage="declared"></identifier>
 		<symbol> ( </symbol>
 		<parameterList>
 		</parameterList>
@@ -103,18 +107,22 @@
 			<statements>
 				<doStatement>
 					<keyword> do </keyword>
-					<identifier> Memory </identifier>
-					<symbol> . </symbol>
-					<identifier> deAlloc </identifier>
-					<symbol> ( </symbol>
-					<expressionList>
-						<expression>
-							<term>
-								<keyword> this </keyword>
-							</term>
-						</expression>
-					</expressionList>
-					<symbol> ) </symbol>
+					<expression>
+						<term>
+							<identifier name="Memory" category="class" index="-1" usage="used"></identifier>
+							<symbol> . </symbol>
+							<identifier name="deAlloc" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+								<expression>
+									<term>
+										<keyword> this </keyword>
+									</term>
+								</expression>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
 					<symbol> ; </symbol>
 				</doStatement>
 				<returnStatement>
@@ -128,7 +136,7 @@
 	<subroutineDec>
 		<keyword> method </keyword>
 		<keyword> void </keyword>
-		<identifier> draw </identifier>
+		<identifier name="draw" category="subroutine" index="-1" usage="declared"></identifier>
 		<symbol> ( </symbol>
 		<parameterList>
 		</parameterList>
@@ -138,52 +146,60 @@
 			<statements>
 				<doStatement>
 					<keyword> do </keyword>
-					<identifier> Screen </identifier>
-					<symbol> . </symbol>
-					<identifier> setColor </identifier>
-					<symbol> ( </symbol>
-					<expressionList>
-						<expression>
-							<term>
-								<identifier> x </identifier>
-							</term>
-						</expression>
-					</expressionList>
-					<symbol> ) </symbol>
+					<expression>
+						<term>
+							<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+							<symbol> . </symbol>
+							<identifier name="setColor" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+								<expression>
+									<term>
+										<identifier name="x" category="field" index="0" usage="used"></identifier>
+									</term>
+								</expression>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
 					<symbol> ; </symbol>
 				</doStatement>
 				<doStatement>
 					<keyword> do </keyword>
-					<identifier> Screen </identifier>
-					<symbol> . </symbol>
-					<identifier> drawRectangle </identifier>
-					<symbol> ( </symbol>
-					<expressionList>
-						<expression>
-							<term>
-								<identifier> x </identifier>
-							</term>
-						</expression>
-						<symbol> , </symbol>
-						<expression>
-							<term>
-								<identifier> y </identifier>
-							</term>
-						</expression>
-						<symbol> , </symbol>
-						<expression>
-							<term>
-								<identifier> x </identifier>
-							</term>
-						</expression>
-						<symbol> , </symbol>
-						<expression>
-							<term>
-								<identifier> y </identifier>
-							</term>
-						</expression>
-					</expressionList>
-					<symbol> ) </symbol>
+					<expression>
+						<term>
+							<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+							<symbol> . </symbol>
+							<identifier name="drawRectangle" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+								<expression>
+									<term>
+										<identifier name="x" category="field" index="0" usage="used"></identifier>
+									</term>
+								</expression>
+								<symbol> , </symbol>
+								<expression>
+									<term>
+										<identifier name="y" category="field" index="1" usage="used"></identifier>
+									</term>
+								</expression>
+								<symbol> , </symbol>
+								<expression>
+									<term>
+										<identifier name="x" category="field" index="0" usage="used"></identifier>
+									</term>
+								</expression>
+								<symbol> , </symbol>
+								<expression>
+									<term>
+										<identifier name="y" category="field" index="1" usage="used"></identifier>
+									</term>
+								</expression>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
 					<symbol> ; </symbol>
 				</doStatement>
 				<returnStatement>
@@ -197,7 +213,7 @@
 	<subroutineDec>
 		<keyword> method </keyword>
 		<keyword> void </keyword>
-		<identifier> erase </identifier>
+		<identifier name="erase" category="subroutine" index="-1" usage="declared"></identifier>
 		<symbol> ( </symbol>
 		<parameterList>
 		</parameterList>
@@ -207,52 +223,60 @@
 			<statements>
 				<doStatement>
 					<keyword> do </keyword>
-					<identifier> Screen </identifier>
-					<symbol> . </symbol>
-					<identifier> setColor </identifier>
-					<symbol> ( </symbol>
-					<expressionList>
-						<expression>
-							<term>
-								<identifier> x </identifier>
-							</term>
-						</expression>
-					</expressionList>
-					<symbol> ) </symbol>
+					<expression>
+						<term>
+							<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+							<symbol> . </symbol>
+							<identifier name="setColor" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+								<expression>
+									<term>
+										<identifier name="x" category="field" index="0" usage="used"></identifier>
+									</term>
+								</expression>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
 					<symbol> ; </symbol>
 				</doStatement>
 				<doStatement>
 					<keyword> do </keyword>
-					<identifier> Screen </identifier>
-					<symbol> . </symbol>
-					<identifier> drawRectangle </identifier>
-					<symbol> ( </symbol>
-					<expressionList>
-						<expression>
-							<term>
-								<identifier> x </identifier>
-							</term>
-						</expression>
-						<symbol> , </symbol>
-						<expression>
-							<term>
-								<identifier> y </identifier>
-							</term>
-						</expression>
-						<symbol> , </symbol>
-						<expression>
-							<term>
-								<identifier> x </identifier>
-							</term>
-						</expression>
-						<symbol> , </symbol>
-						<expression>
-							<term>
-								<identifier> y </identifier>
-							</term>
-						</expression>
-					</expressionList>
-					<symbol> ) </symbol>
+					<expression>
+						<term>
+							<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+							<symbol> . </symbol>
+							<identifier name="drawRectangle" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+								<expression>
+									<term>
+										<identifier name="x" category="field" index="0" usage="used"></identifier>
+									</term>
+								</expression>
+								<symbol> , </symbol>
+								<expression>
+									<term>
+										<identifier name="y" category="field" index="1" usage="used"></identifier>
+									</term>
+								</expression>
+								<symbol> , </symbol>
+								<expression>
+									<term>
+										<identifier name="x" category="field" index="0" usage="used"></identifier>
+									</term>
+								</expression>
+								<symbol> , </symbol>
+								<expression>
+									<term>
+										<identifier name="y" category="field" index="1" usage="used"></identifier>
+									</term>
+								</expression>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
 					<symbol> ; </symbol>
 				</doStatement>
 				<returnStatement>
@@ -266,7 +290,7 @@
 	<subroutineDec>
 		<keyword> method </keyword>
 		<keyword> void </keyword>
-		<identifier> incSize </identifier>
+		<identifier name="incSize" category="subroutine" index="-1" usage="declared"></identifier>
 		<symbol> ( </symbol>
 		<parameterList>
 		</parameterList>
@@ -279,7 +303,7 @@
 					<symbol> ( </symbol>
 					<expression>
 						<term>
-							<identifier> x </identifier>
+							<identifier name="x" category="field" index="0" usage="used"></identifier>
 						</term>
 					</expression>
 					<symbol> ) </symbol>
@@ -287,31 +311,39 @@
 					<statements>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> erase </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="erase" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 						<letStatement>
 							<keyword> let </keyword>
-							<identifier> size </identifier>
+							<identifier name="size" category="field" index="2" usage="used"></identifier>
 							<symbol> = </symbol>
 							<expression>
 								<term>
-									<identifier> size </identifier>
+									<identifier name="size" category="field" index="2" usage="used"></identifier>
 								</term>
 							</expression>
 							<symbol> ; </symbol>
 						</letStatement>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> draw </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="draw" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 					</statements>
@@ -328,7 +360,7 @@
 	<subroutineDec>
 		<keyword> method </keyword>
 		<keyword> void </keyword>
-		<identifier> decSize </identifier>
+		<identifier name="decSize" category="subroutine" index="-1" usage="declared"></identifier>
 		<symbol> ( </symbol>
 		<parameterList>
 		</parameterList>
@@ -341,7 +373,7 @@
 					<symbol> ( </symbol>
 					<expression>
 						<term>
-							<identifier> size </identifier>
+							<identifier name="size" category="field" index="2" usage="used"></identifier>
 						</term>
 					</expression>
 					<symbol> ) </symbol>
@@ -349,31 +381,39 @@
 					<statements>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> erase </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="erase" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 						<letStatement>
 							<keyword> let </keyword>
-							<identifier> size </identifier>
+							<identifier name="size" category="field" index="2" usage="used"></identifier>
 							<symbol> = </symbol>
 							<expression>
 								<term>
-									<identifier> size </identifier>
+									<identifier name="size" category="field" index="2" usage="used"></identifier>
 								</term>
 							</expression>
 							<symbol> ; </symbol>
 						</letStatement>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> draw </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="draw" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 					</statements>
@@ -390,7 +430,7 @@
 	<subroutineDec>
 		<keyword> method </keyword>
 		<keyword> void </keyword>
-		<identifier> moveUp </identifier>
+		<identifier name="moveUp" category="subroutine" index="-1" usage="declared"></identifier>
 		<symbol> ( </symbol>
 		<parameterList>
 		</parameterList>
@@ -403,7 +443,7 @@
 					<symbol> ( </symbol>
 					<expression>
 						<term>
-							<identifier> y </identifier>
+							<identifier name="y" category="field" index="1" usage="used"></identifier>
 						</term>
 					</expression>
 					<symbol> ) </symbol>
@@ -411,113 +451,129 @@
 					<statements>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> setColor </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="setColor" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> drawRectangle </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="drawRectangle" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 						<letStatement>
 							<keyword> let </keyword>
-							<identifier> y </identifier>
+							<identifier name="y" category="field" index="1" usage="used"></identifier>
 							<symbol> = </symbol>
 							<expression>
 								<term>
-									<identifier> y </identifier>
+									<identifier name="y" category="field" index="1" usage="used"></identifier>
 								</term>
 							</expression>
 							<symbol> ; </symbol>
 						</letStatement>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> setColor </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="setColor" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> drawRectangle </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="drawRectangle" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 					</statements>
@@ -534,7 +590,7 @@
 	<subroutineDec>
 		<keyword> method </keyword>
 		<keyword> void </keyword>
-		<identifier> moveDown </identifier>
+		<identifier name="moveDown" category="subroutine" index="-1" usage="declared"></identifier>
 		<symbol> ( </symbol>
 		<parameterList>
 		</parameterList>
@@ -547,7 +603,7 @@
 					<symbol> ( </symbol>
 					<expression>
 						<term>
-							<identifier> y </identifier>
+							<identifier name="y" category="field" index="1" usage="used"></identifier>
 						</term>
 					</expression>
 					<symbol> ) </symbol>
@@ -555,113 +611,129 @@
 					<statements>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> setColor </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="setColor" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> drawRectangle </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="drawRectangle" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 						<letStatement>
 							<keyword> let </keyword>
-							<identifier> y </identifier>
+							<identifier name="y" category="field" index="1" usage="used"></identifier>
 							<symbol> = </symbol>
 							<expression>
 								<term>
-									<identifier> y </identifier>
+									<identifier name="y" category="field" index="1" usage="used"></identifier>
 								</term>
 							</expression>
 							<symbol> ; </symbol>
 						</letStatement>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> setColor </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="setColor" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> drawRectangle </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="drawRectangle" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 					</statements>
@@ -678,7 +750,7 @@
 	<subroutineDec>
 		<keyword> method </keyword>
 		<keyword> void </keyword>
-		<identifier> moveLeft </identifier>
+		<identifier name="moveLeft" category="subroutine" index="-1" usage="declared"></identifier>
 		<symbol> ( </symbol>
 		<parameterList>
 		</parameterList>
@@ -691,7 +763,7 @@
 					<symbol> ( </symbol>
 					<expression>
 						<term>
-							<identifier> x </identifier>
+							<identifier name="x" category="field" index="0" usage="used"></identifier>
 						</term>
 					</expression>
 					<symbol> ) </symbol>
@@ -699,113 +771,129 @@
 					<statements>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> setColor </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="setColor" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> drawRectangle </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="drawRectangle" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 						<letStatement>
 							<keyword> let </keyword>
-							<identifier> x </identifier>
+							<identifier name="x" category="field" index="0" usage="used"></identifier>
 							<symbol> = </symbol>
 							<expression>
 								<term>
-									<identifier> x </identifier>
+									<identifier name="x" category="field" index="0" usage="used"></identifier>
 								</term>
 							</expression>
 							<symbol> ; </symbol>
 						</letStatement>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> setColor </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="setColor" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> drawRectangle </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="drawRectangle" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 					</statements>
@@ -822,7 +910,7 @@
 	<subroutineDec>
 		<keyword> method </keyword>
 		<keyword> void </keyword>
-		<identifier> moveRight </identifier>
+		<identifier name="moveRight" category="subroutine" index="-1" usage="declared"></identifier>
 		<symbol> ( </symbol>
 		<parameterList>
 		</parameterList>
@@ -835,7 +923,7 @@
 					<symbol> ( </symbol>
 					<expression>
 						<term>
-							<identifier> x </identifier>
+							<identifier name="x" category="field" index="0" usage="used"></identifier>
 						</term>
 					</expression>
 					<symbol> ) </symbol>
@@ -843,113 +931,129 @@
 					<statements>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> setColor </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="setColor" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> drawRectangle </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="drawRectangle" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 						<letStatement>
 							<keyword> let </keyword>
-							<identifier> x </identifier>
+							<identifier name="x" category="field" index="0" usage="used"></identifier>
 							<symbol> = </symbol>
 							<expression>
 								<term>
-									<identifier> x </identifier>
+									<identifier name="x" category="field" index="0" usage="used"></identifier>
 								</term>
 							</expression>
 							<symbol> ; </symbol>
 						</letStatement>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> setColor </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="setColor" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 						<doStatement>
 							<keyword> do </keyword>
-							<identifier> Screen </identifier>
-							<symbol> . </symbol>
-							<identifier> drawRectangle </identifier>
-							<symbol> ( </symbol>
-							<expressionList>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> x </identifier>
-									</term>
-								</expression>
-								<symbol> , </symbol>
-								<expression>
-									<term>
-										<identifier> y </identifier>
-									</term>
-								</expression>
-							</expressionList>
-							<symbol> ) </symbol>
+							<expression>
+								<term>
+									<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+									<symbol> . </symbol>
+									<identifier name="drawRectangle" category="subroutine" index="-1" usage="used"></identifier>
+									<symbol> ( </symbol>
+									<expressionList>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="x" category="field" index="0" usage="used"></identifier>
+											</term>
+										</expression>
+										<symbol> , </symbol>
+										<expression>
+											<term>
+												<identifier name="y" category="field" index="1" usage="used"></identifier>
+											</term>
+										</expression>
+									</expressionList>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
 							<symbol> ; </symbol>
 						</doStatement>
 					</statements>

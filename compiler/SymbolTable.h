@@ -18,16 +18,15 @@ struct SymbolInfo {
 
 class SymbolTable {
 public:
-    SymbolTable(const std::string& scope_name);
+    SymbolTable();
     ~SymbolTable();
 private:
-    std::string scope;
     int static_index;
     int field_index;
     int arg_index;
     int var_index;
     std::unordered_map<std::string, SymbolInfo> symbol_table;
-
+public:
     void reset();
         // empties the symbol table, and resets the four indices to 0
         // should be called when starting to compie a subroutine declaration

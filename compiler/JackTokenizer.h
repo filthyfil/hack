@@ -30,12 +30,10 @@ public:
 
     bool hasMoreTokens();
     void advance();
-
     std::string xml_escape(const std::string& token);
     void xml_emitter();
-
+    
     std::string tokenizer();
-
     // token accessors
     Type tokenType();
     KeyWord keyWord();
@@ -48,8 +46,9 @@ public:
     std::ofstream t_xml_file;
     std::string jack_file_name;
 
-private:
     std::string current_line;
+    unsigned int line_number;
+private:
     std::istringstream token_builder;
     std::string current_token;
     Type current_type;

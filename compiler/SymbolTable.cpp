@@ -1,7 +1,6 @@
 #include "SymbolTable.h"
 
-SymbolTable::SymbolTable(const std::string& scope) : 
-    scope{scope},
+SymbolTable::SymbolTable() : 
     static_index{0},
     field_index{0},
     arg_index{0},

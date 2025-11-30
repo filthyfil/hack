@@ -5,6 +5,7 @@
 #include <cstddef>
 
 #include "TokenUtils.h"
+#include "SymbolTable.h"
 
 class CompilationEngine {
 public:
@@ -15,16 +16,34 @@ public:
     void compile();
 
 private:
+    // modules
+
+    // references the tokenizer, whose outputs is a stream of tokens
+    // get next token with advance() method
+    JackTokenizer& tokenizer;
+
+    // constructs two instances of SymbolTable
+    // (1) class variables (static, field)
+    // (2) subroutine variables (local, argument)
+    SymbolTable class_symbol_table;
+    SymbolTable subroutine_symbol_table;
+
+    std::string class_name;
+
     // output and state
     std::ofstream xml_file;
-    JackTokenizer& tokenizer;
     size_t indent_level;
 
-    // low level emit helpers
+    // xml emit helpers
     void writeIndent();
     void writeOpen(const std::string& tag);
     void writeClose(const std::string& tag);
     void writeToken(const std::string& tag, const std::string& token);
+    std::string kindToCategory(Kind k);
+    enum class IdentifierUsage { iu_DECLARED, iu_USED };
+    enum class IdentifierRole  { ir_VARLIKE, // static/field/arg/var
+                                ir_CLASSNAME, ir_SUBROUTINENAME };
+    void writeIdentifier(const std::string& name, IdentifierUsage usage, IdentifierRole role);
 
     // compilation routines 
     void compileClass();
