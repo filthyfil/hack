@@ -43,8 +43,9 @@ public:
     std::string stringVal();
 
     std::ifstream jack_file;
-    std::ofstream t_xml_file;
     std::string jack_file_name;
+    std::ofstream t_xml_file;
+    std::string base;
 
     std::string current_line;
     unsigned int line_number;

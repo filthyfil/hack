@@ -6,10 +6,11 @@
 
 #include "TokenUtils.h"
 #include "SymbolTable.h"
+#include "VMWriter.h"
 
 class CompilationEngine {
 public:
-    CompilationEngine(JackTokenizer& jack_tokenizer);
+    CompilationEngine(JackTokenizer& jack_tokenizer, const std::string& base);
     ~CompilationEngine();
 
     // entry point
@@ -27,8 +28,10 @@ private:
     // (2) subroutine variables (local, argument)
     SymbolTable class_symbol_table;
     SymbolTable subroutine_symbol_table;
-
     std::string class_name;
+
+    // writes VM code
+    VMWriter vmwriter;
 
     // output and state
     std::ofstream xml_file;
@@ -44,6 +47,12 @@ private:
     enum class IdentifierRole  { ir_VARLIKE, // static/field/arg/var
                                 ir_CLASSNAME, ir_SUBROUTINENAME };
     void writeIdentifier(const std::string& name, IdentifierUsage usage, IdentifierRole role);
+
+    // vm writer helpers
+    std::string kindToSegment(Kind k);
+    void pushVar(const std::string& name);
+    void popVar(const std::string& name);
+    void codeWrite(const std::string& exp);
 
     // compilation routines 
     void compileClass();

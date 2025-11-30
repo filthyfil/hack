@@ -4,16 +4,13 @@
 #include <stdexcept>
 #include <cstdlib>
 
-CompilationEngine::CompilationEngine(JackTokenizer& jack_tokenizer) :
+CompilationEngine::CompilationEngine(JackTokenizer& jack_tokenizer, const std::string& base) :
     tokenizer(jack_tokenizer), 
     indent_level{0},
     class_symbol_table{},
     subroutine_symbol_table{},
-    class_name{} {
-    std::string jack_file_name = jack_tokenizer.jack_file_name;
-    // strip .jack extension
-    size_t dot = jack_file_name.find_last_of('.');
-    std::string base = jack_file_name.substr(0, dot);
+    class_name{},
+    vmwriter(base + ".vm") {
     std::string xml_file_name = base + ".xml";
     // open output file
     xml_file.open(xml_file_name);
@@ -56,16 +53,6 @@ inline void CompilationEngine::writeToken(const std::string& tag, const std::str
             << " </" << tag << ">\n";
 }
 
-std::string CompilationEngine::kindToCategory(Kind k) {
-    switch (k) {
-        case Kind::k_STATIC: return "static";
-        case Kind::k_FIELD: return "field";
-        case Kind::k_ARG: return "arg";
-        case Kind::k_VAR: return "var";
-        default: return "none";  // not in symbol table
-    }
-}
-
 void CompilationEngine::writeIdentifier(const std::string& name, IdentifierUsage usage, IdentifierRole role) {
     std::string category;
     int index = -1;
@@ -106,6 +93,64 @@ void CompilationEngine::writeIdentifier(const std::string& name, IdentifierUsage
              << "\">"
              << "</identifier>\n";
 }
+
+std::string CompilationEngine::kindToCategory(Kind k) {
+    switch (k) {
+        case Kind::k_STATIC: return "static";
+        case Kind::k_FIELD: return "field";
+        case Kind::k_ARG: return "arg";
+        case Kind::k_VAR: return "var";
+        default: return "none"; // not in symbol table
+    }
+}
+
+std::string CompilationEngine::kindToSegment(Kind k) {
+    switch (k) {
+        case Kind::k_STATIC: return "static";
+        case Kind::k_FIELD:  return "this"; // fields 
+        case Kind::k_ARG:    return "argument";
+        case Kind::k_VAR:    return "local";
+        default: throw std::runtime_error("[error] no match for k in kindToSegment()."); 
+    }
+}
+
+void CompilationEngine::pushVar(const std::string& name) {
+    Kind k = subroutine_symbol_table.kindOf(name);
+    int index;
+
+    if (k != Kind::k_NONE) {
+        index = subroutine_symbol_table.indexOf(name);
+    } 
+    else {
+        k = class_symbol_table.kindOf(name);
+        if (k == Kind::k_NONE) {
+            throw std::runtime_error("Unknown variable: " + name);
+        }
+        index = class_symbol_table.indexOf(name);
+    }
+
+    vmwriter.writePush(kindToSegment(k), index);
+}
+
+void CompilationEngine::popVar(const std::string& name) {
+    Kind k = subroutine_symbol_table.kindOf(name);
+    int index;
+
+    if (k != Kind::k_NONE) {
+        index = subroutine_symbol_table.indexOf(name);
+    } 
+    else {
+        k = class_symbol_table.kindOf(name);
+        if (k == Kind::k_NONE) {
+            throw std::runtime_error("Unknown variable: " + name);
+        }
+        index = class_symbol_table.indexOf(name);
+    }
+
+    vmwriter.writePop(kindToSegment(k), index);
+}
+
+void CompilationEngine::codeWrite(const std::string& exp) {}
 
 void CompilationEngine::compileClass() {
     // clear symbol table
@@ -866,7 +911,8 @@ void CompilationEngine::compileTerm() {
             if (k == Kind::k_NONE) {
                 // treat as className
                 writeIdentifier(name, IdentifierUsage::iu_USED, IdentifierRole::ir_CLASSNAME);
-            } else {
+            } 
+            else {
                 // found in a table: var/field/arg/static
                 writeIdentifier(name, IdentifierUsage::iu_USED, IdentifierRole::ir_VARLIKE);
             }

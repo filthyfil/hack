@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     tokenizer.advance();
 
     // create compilation engine
-    CompilationEngine engine(tokenizer);
+    CompilationEngine engine(tokenizer, tokenizer.base);
 
     // start compilation at the grammar's root rule
     engine.compile();
