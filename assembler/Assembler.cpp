@@ -187,7 +187,7 @@ int main(int argc, char* argv[]) {
     Coder coder;
     SymbolTable symbolTable;
 
-    // --- PASS 1: build the symbol table with labels ---
+    // PASS 1: build the symbol table with labels
     unsigned int romAddress = 0;
     while (parser.advance()) {
         if (parser.commandType() == "L_COMMAND") {
@@ -201,7 +201,7 @@ int main(int argc, char* argv[]) {
 
     parser.reset(); // reset file for the second pass
 
-    // --- PASS 2: generate code and handle variables ---
+    // PASS 2: generate code and handle variables
     if (!hack_file.is_open()) {
         std::cerr << "[Error] Unable to create output file: " << output_path.string() << "\n";
         return 1;

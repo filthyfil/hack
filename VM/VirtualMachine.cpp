@@ -115,7 +115,7 @@ public:
 };
 
 class CodeWriter {
-    std::string file_name_base;       // Stores base name like "Sys" for static variables
+    std::string file_name_base; // Stores base name like "Sys" for static variables
     std::string current_function_name; // Stores current function for labels
     std::ofstream out;
     unsigned int label_counter = 0;
