@@ -4,24 +4,31 @@
 #include <stdexcept>
 #include <cstdlib>
 
-CompilationEngine::CompilationEngine(JackTokenizer& jack_tokenizer, const std::string& base) :
+CompilationEngine::CompilationEngine(JackTokenizer& jack_tokenizer, bool emit_xml) :
     tokenizer(jack_tokenizer), 
-    indent_level{0},
     class_symbol_table{},
     subroutine_symbol_table{},
-    class_name{},
-    vmwriter(base + ".vm") {
-    std::string xml_file_name = base + ".xml";
-    // open output file
-    xml_file.open(xml_file_name);
-    if (!xml_file.is_open()) {
-        std::cerr << "[error] cannot create XML file: " << xml_file_name << " \n";
-        std::exit(1);
+    vmwriter(jack_tokenizer.path),
+    emit_xml_flag{emit_xml},
+    indent_level{0},
+    class_name{} {
+
+    if (emit_xml) {
+        std::filesystem::path xml_file_path = jack_tokenizer.path;
+        xml_file_path.replace_extension("xml");
+        // open output file
+        xml_file.open(xml_file_path);
+        if (!xml_file.is_open()) {
+            std::cerr << "[error] cannot create XML file: " << xml_file_path << " \n";
+            std::exit(1);
+        }
     }
 }
 
 CompilationEngine::~CompilationEngine() {
     if (xml_file.is_open())
+        xml_file.close();
+    if (emit_xml_flag && xml_file.is_open())
         xml_file.close();
 }
 
@@ -29,33 +36,38 @@ void CompilationEngine::compile() {
     compileClass(); // compileClass(); calls all other compilation processes
 }
 
-inline void CompilationEngine::writeIndent() {
+inline void CompilationEngine::emitIndent() {
+    if (!emit_xml_flag) return;
     for (size_t i = 0; i < indent_level; ++i)
         xml_file << '\t';
 }
 
-inline void CompilationEngine::writeOpen(const std::string& tag) {
-    writeIndent();
+inline void CompilationEngine::emitOpen(const std::string& tag) {
+    if (!emit_xml_flag) {++indent_level; return;}
+    emitIndent();
     xml_file << '<' << tag << '>' << '\n';
     ++indent_level;
 }
 
-inline void CompilationEngine::writeClose(const std::string& tag) {
+inline void CompilationEngine::emitClose(const std::string& tag) {
     --indent_level;
-    writeIndent();
+    if (!emit_xml_flag) return;
+    emitIndent();
     xml_file << "</" << tag << ">\n";
 }
 
-inline void CompilationEngine::writeToken(const std::string& tag, const std::string& token) {
-    writeIndent();
+inline void CompilationEngine::emitToken(const std::string& tag, const std::string& token) {
+    if (!emit_xml_flag) return;
+    emitIndent();
     xml_file << '<' << tag << "> "
             << tokenizer.xml_escape(token)
             << " </" << tag << ">\n";
 }
 
-void CompilationEngine::writeIdentifier(const std::string& name, IdentifierUsage usage, IdentifierRole role) {
+void CompilationEngine::emitIdentifier(const std::string& name, IdentifierUsage usage, IdentifierRole role) {
     std::string category;
     int index = -1;
+    if (!emit_xml_flag) return;
 
     if (role == IdentifierRole::ir_VARLIKE) {
         // first look in subroutine scope
@@ -77,14 +89,14 @@ void CompilationEngine::writeIdentifier(const std::string& name, IdentifierUsage
     } 
     else if (role == IdentifierRole::ir_CLASSNAME) {
         category = "class";
-        index    = -1;
+        index = -1;
     } 
     else if (role == IdentifierRole::ir_SUBROUTINENAME) {
         category = "subroutine";
-        index    = -1;
+        index = -1;
     }
 
-    writeIndent();
+    emitIndent();
     xml_file << "<identifier "
              << "name=\""     << tokenizer.xml_escape(name) << "\" "
              << "category=\"" << category << "\" "
@@ -100,17 +112,52 @@ std::string CompilationEngine::kindToCategory(Kind k) {
         case Kind::k_FIELD: return "field";
         case Kind::k_ARG: return "arg";
         case Kind::k_VAR: return "var";
-        default: return "none"; // not in symbol table
+        default: throw std::runtime_error("[error] no match for k in kindToCategory()."); // not in symbol table
     }
 }
 
 std::string CompilationEngine::kindToSegment(Kind k) {
     switch (k) {
         case Kind::k_STATIC: return "static";
-        case Kind::k_FIELD:  return "this"; // fields 
-        case Kind::k_ARG:    return "argument";
-        case Kind::k_VAR:    return "local";
+        case Kind::k_FIELD: return "this"; // fields 
+        case Kind::k_ARG: return "argument";
+        case Kind::k_VAR: return "local";
         default: throw std::runtime_error("[error] no match for k in kindToSegment()."); 
+    }
+}
+
+static bool isOpChar(char c) {
+    switch (c) {
+        case '+': case '-': case '*': case '/':
+        case '&': case '|': case '<': case '>': case '=':
+            return true;
+        default:
+            return false;
+    }
+}
+
+void CompilationEngine::writeOp(char op) {
+    switch (op) {
+        case '+': vmwriter.VMWriter::writeArithmetic("add"); break;
+        case '-': vmwriter.VMWriter::writeArithmetic("sub"); break;
+        case '&': vmwriter.VMWriter::writeArithmetic("and"); break;
+        case '|': vmwriter.VMWriter::writeArithmetic("or"); break;
+        case '<': vmwriter.VMWriter::writeArithmetic("lt"); break;
+        case '>': vmwriter.VMWriter::writeArithmetic("gt"); break;
+        case '=': vmwriter.VMWriter::writeArithmetic("eq"); break;
+        case '*': vmwriter.VMWriter::writeCall("Math.multiply", 2); break; // OS call
+        case '/': vmwriter.VMWriter::writeCall("Math.divide", 2); break; // OS call
+        default:
+            throw std::runtime_error("Unknown binary op at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
+    }
+}
+
+void CompilationEngine::writeUnaryOp(char op) {
+    switch (op) {
+        case '-': vmwriter.writeArithmetic("neg"); break;
+        case '~': vmwriter.writeArithmetic("not"); break;
+        default:
+            throw std::runtime_error("writeUnaryOp: unknown op at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
     }
 }
 
@@ -124,7 +171,7 @@ void CompilationEngine::pushVar(const std::string& name) {
     else {
         k = class_symbol_table.kindOf(name);
         if (k == Kind::k_NONE) {
-            throw std::runtime_error("Unknown variable: " + name);
+            throw std::runtime_error("[error] Unknown variable: " + name + " at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
         }
         index = class_symbol_table.indexOf(name);
     }
@@ -142,7 +189,7 @@ void CompilationEngine::popVar(const std::string& name) {
     else {
         k = class_symbol_table.kindOf(name);
         if (k == Kind::k_NONE) {
-            throw std::runtime_error("Unknown variable: " + name);
+            throw std::runtime_error("[error] Unknown variable: " + name + " at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
         }
         index = class_symbol_table.indexOf(name);
     }
@@ -150,21 +197,24 @@ void CompilationEngine::popVar(const std::string& name) {
     vmwriter.writePop(kindToSegment(k), index);
 }
 
-void CompilationEngine::codeWrite(const std::string& exp) {}
+void CompilationEngine::codeWrite(const std::string& exp) {
+    
+}
 
 void CompilationEngine::compileClass() {
     // clear symbol table
     class_symbol_table.reset();
     subroutine_symbol_table.reset();
     // 'class' className '{' classVarDec* subroutineDec* '}'
-    writeOpen("class");
+    emitOpen("class");
     // 'class'
     if (tokenizer.tokenType() != Type::t_KEYWORD ||
         tokenizer.keyWord() != KeyWord::kw_CLASS) {
+
         throw std::runtime_error("Expected 'class' at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
     }
 
-    writeToken("keyword", keywordToString(tokenizer.keyWord()));
+    emitToken("keyword", keywordToString(tokenizer.keyWord()));
     tokenizer.advance();
 
     // className
@@ -172,28 +222,30 @@ void CompilationEngine::compileClass() {
         throw std::runtime_error("Expected className at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
     
     class_name = tokenizer.identifier();
-    writeIdentifier(class_name, IdentifierUsage::iu_DECLARED, IdentifierRole::ir_CLASSNAME);
+    emitIdentifier(class_name, IdentifierUsage::iu_DECLARED, IdentifierRole::ir_CLASSNAME);
     tokenizer.advance();
 
     // '{'
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != '{')
         throw std::runtime_error("Expected '{' at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", "{");
+    emitToken("symbol", "{");
     tokenizer.advance();
 
     // classVarDec*
     while (tokenizer.tokenType() == Type::t_KEYWORD &&
-        (tokenizer.keyWord() == KeyWord::kw_STATIC ||
-        tokenizer.keyWord() == KeyWord::kw_FIELD)) {
+          (tokenizer.keyWord() == KeyWord::kw_STATIC ||
+           tokenizer.keyWord() == KeyWord::kw_FIELD)) {
+
         compileClassVarDec();
     }
 
     // subroutineDec*
     while (tokenizer.tokenType() == Type::t_KEYWORD &&
-        (tokenizer.keyWord() == KeyWord::kw_CONSTRUCTOR ||
-        tokenizer.keyWord() == KeyWord::kw_FUNCTION ||
-        tokenizer.keyWord() == KeyWord::kw_METHOD)) {
+          (tokenizer.keyWord() == KeyWord::kw_CONSTRUCTOR ||
+           tokenizer.keyWord() == KeyWord::kw_FUNCTION ||
+           tokenizer.keyWord() == KeyWord::kw_METHOD)) {
+
         compileSubroutine();
     }
 
@@ -201,41 +253,42 @@ void CompilationEngine::compileClass() {
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != '}')
         throw std::runtime_error("Expected '}' at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", "}");
+    emitToken("symbol", "}");
     tokenizer.advance();
-    writeClose("class");
+    emitClose("class");
 }
 
 void CompilationEngine::compileClassVarDec() {
     // ('static'|'field') type varName(',' varName)* ';'
-    writeOpen("classVarDec");
+    emitOpen("classVarDec");
     // static | field
     if (tokenizer.tokenType() != Type::t_KEYWORD ||
-        (tokenizer.keyWord() != KeyWord::kw_STATIC &&
+       (tokenizer.keyWord() != KeyWord::kw_STATIC &&
         tokenizer.keyWord() != KeyWord::kw_FIELD)) {
+
         throw std::runtime_error("Expected 'static' or 'field' in classVarDec at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
     }
 
     Kind kind = (tokenizer.keyWord() == KeyWord::kw_STATIC) ? Kind::k_STATIC : Kind::k_FIELD;
-    writeToken("keyword", keywordToString(tokenizer.keyWord()));
+    emitToken("keyword", keywordToString(tokenizer.keyWord()));
     tokenizer.advance();
 
     // type  (keyword type or identifier type)
     std::string type;
     if (tokenizer.tokenType() == Type::t_KEYWORD &&
-        (tokenizer.keyWord() == KeyWord::kw_INT ||
+       (tokenizer.keyWord() == KeyWord::kw_INT ||
         tokenizer.keyWord() == KeyWord::kw_CHAR ||
         tokenizer.keyWord() == KeyWord::kw_BOOLEAN)) {
 
         // primitive type
         type = keywordToString(tokenizer.keyWord());
-        writeToken("keyword", type);
+        emitToken("keyword", type);
         tokenizer.advance();
     }
     else if (tokenizer.tokenType() == Type::t_IDENTIFIER) {
         // className type
         type = tokenizer.identifier();
-        writeIdentifier(type, IdentifierUsage::iu_USED, IdentifierRole::ir_CLASSNAME);
+        emitIdentifier(type, IdentifierUsage::iu_USED, IdentifierRole::ir_CLASSNAME);
         tokenizer.advance();
     }
     else {
@@ -249,14 +302,14 @@ void CompilationEngine::compileClassVarDec() {
 
     std::string name = tokenizer.identifier();
     class_symbol_table.define(name, type, kind);
-    writeIdentifier(tokenizer.identifier(), IdentifierUsage::iu_DECLARED, IdentifierRole::ir_VARLIKE);
+    emitIdentifier(tokenizer.identifier(), IdentifierUsage::iu_DECLARED, IdentifierRole::ir_VARLIKE);
     tokenizer.advance();
 
     // (',' varName)*
     while (tokenizer.tokenType() == Type::t_SYMBOL &&
         tokenizer.symbol() == ',') {
 
-        writeToken("symbol", ",");
+        emitToken("symbol", ",");
         tokenizer.advance();
 
         if (tokenizer.tokenType() != Type::t_IDENTIFIER)
@@ -264,7 +317,7 @@ void CompilationEngine::compileClassVarDec() {
 
         name = tokenizer.identifier();
         class_symbol_table.define(name, type, kind);
-        writeIdentifier(tokenizer.identifier(), IdentifierUsage::iu_DECLARED, IdentifierRole::ir_VARLIKE);
+        emitIdentifier(tokenizer.identifier(), IdentifierUsage::iu_DECLARED, IdentifierRole::ir_VARLIKE);
         tokenizer.advance();
     }
 
@@ -272,29 +325,30 @@ void CompilationEngine::compileClassVarDec() {
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != ';')
         throw std::runtime_error("Expected ';' at end of classVarDec at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", ";");
+    emitToken("symbol", ";");
     tokenizer.advance();
-    writeClose("classVarDec");
+    emitClose("classVarDec");
 }
 
 void CompilationEngine::compileSubroutine() {
     subroutine_symbol_table.reset();
     // ('constructor'|'functon'|'method') ('void'|type) subroutineName '(' parameterList ')' subroutineBody
-    writeOpen("subroutineDec");
+    emitOpen("subroutineDec");
     // ('constructor'|'function'|'method')
     if (tokenizer.tokenType() != Type::t_KEYWORD ||
-        (tokenizer.keyWord() != KeyWord::kw_CONSTRUCTOR &&
+       (tokenizer.keyWord() != KeyWord::kw_CONSTRUCTOR &&
         tokenizer.keyWord() != KeyWord::kw_FUNCTION &&
         tokenizer.keyWord() != KeyWord::kw_METHOD)) {
-        throw std::runtime_error("Expected constructor/function/method at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
+
+        throw std::runtime_error("Expected constructor|function|method at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
     }
 
-    KeyWord subroutine_kind = tokenizer.keyWord();
-    writeToken("keyword", keywordToString(tokenizer.keyWord()));
+    current_subroutine_keyword = tokenizer.keyWord();
+    emitToken("keyword", keywordToString(current_subroutine_keyword));
     tokenizer.advance();
 
     // implicit 'this' for methods
-    if (subroutine_kind == KeyWord::kw_METHOD) {
+    if (current_subroutine_keyword == KeyWord::kw_METHOD) {
         // 'this' is ARG 0 of type <class_name>
         subroutine_symbol_table.define("this", class_name, Kind::k_ARG);
     }
@@ -303,20 +357,20 @@ void CompilationEngine::compileSubroutine() {
     if (tokenizer.tokenType() == Type::t_KEYWORD &&
         tokenizer.keyWord() == KeyWord::kw_VOID) {
 
-        writeToken("keyword", "void");
+        emitToken("keyword", "void");
         tokenizer.advance();
     }
     else if (tokenizer.tokenType() == Type::t_KEYWORD &&
             (tokenizer.keyWord() == KeyWord::kw_INT ||
-            tokenizer.keyWord() == KeyWord::kw_CHAR ||
-            tokenizer.keyWord() == KeyWord::kw_BOOLEAN)) {
+             tokenizer.keyWord() == KeyWord::kw_CHAR ||
+             tokenizer.keyWord() == KeyWord::kw_BOOLEAN)) {
 
-        writeToken("keyword", keywordToString(tokenizer.keyWord()));
+        emitToken("keyword", keywordToString(tokenizer.keyWord()));
         tokenizer.advance();
     }
     else if (tokenizer.tokenType() == Type::t_IDENTIFIER) {
         // className type
-        writeIdentifier(tokenizer.identifier(), IdentifierUsage::iu_USED, IdentifierRole::ir_CLASSNAME);
+        emitIdentifier(tokenizer.identifier(), IdentifierUsage::iu_USED, IdentifierRole::ir_CLASSNAME);
         tokenizer.advance();
     }
     else {
@@ -327,14 +381,16 @@ void CompilationEngine::compileSubroutine() {
     if (tokenizer.tokenType() != Type::t_IDENTIFIER)
         throw std::runtime_error("Expected subroutineName at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeIdentifier(tokenizer.identifier(), IdentifierUsage::iu_DECLARED, IdentifierRole::ir_SUBROUTINENAME);
+    current_subroutine_name = tokenizer.identifier();
+
+    emitIdentifier(tokenizer.identifier(), IdentifierUsage::iu_DECLARED, IdentifierRole::ir_SUBROUTINENAME);
     tokenizer.advance();
 
     // '('
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != '(')
         throw std::runtime_error("Expected '(' after subroutineName at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", "(");
+    emitToken("symbol", "(");
     tokenizer.advance();
 
     // parameterList
@@ -344,20 +400,20 @@ void CompilationEngine::compileSubroutine() {
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != ')')
         throw std::runtime_error("Expected ')' after parameterList at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", ")");
+    emitToken("symbol", ")");
     tokenizer.advance();
 
     // subroutineBody
     compileSubroutineBody();
-    writeClose("subroutineDec");
+    emitClose("subroutineDec");
 }
 
 void CompilationEngine::compileParameterList() {
     // ((type varName) (',' type varName)*)?
-    writeOpen("parameterList");
+    emitOpen("parameterList");
     // empty?
     if (tokenizer.tokenType() == Type::t_SYMBOL && tokenizer.symbol() == ')') {
-        writeClose("parameterList");
+        emitClose("parameterList");
         return;
     }
 
@@ -365,13 +421,13 @@ void CompilationEngine::compileParameterList() {
     std::string type;
     if (tokenizer.tokenType() == Type::t_KEYWORD) {
         type = keywordToString(tokenizer.keyWord());
-        writeToken("keyword", type);
+        emitToken("keyword", type);
         tokenizer.advance();
     } 
     else if (tokenizer.tokenType() == Type::t_IDENTIFIER) {
         // className type
         type = tokenizer.identifier();
-        writeIdentifier(type, IdentifierUsage::iu_USED, IdentifierRole::ir_CLASSNAME);
+        emitIdentifier(type, IdentifierUsage::iu_USED, IdentifierRole::ir_CLASSNAME);
         tokenizer.advance();
     } 
     else {
@@ -384,27 +440,27 @@ void CompilationEngine::compileParameterList() {
 
     std::string name = tokenizer.identifier();
     subroutine_symbol_table.define(name, type, Kind::k_ARG);
-    writeIdentifier(name, IdentifierUsage::iu_DECLARED, IdentifierRole::ir_VARLIKE);
+    emitIdentifier(name, IdentifierUsage::iu_DECLARED, IdentifierRole::ir_VARLIKE);
     tokenizer.advance();
 
     // (',' type varName)*
     while (tokenizer.tokenType() == Type::t_SYMBOL && tokenizer.symbol() == ',') {
-        writeToken("symbol", ",");
+        emitToken("symbol", ",");
         tokenizer.advance();
 
         // type
         if (tokenizer.tokenType() == Type::t_KEYWORD &&
-            (tokenizer.keyWord() == KeyWord::kw_INT ||
+           (tokenizer.keyWord() == KeyWord::kw_INT ||
             tokenizer.keyWord() == KeyWord::kw_CHAR ||
             tokenizer.keyWord() == KeyWord::kw_BOOLEAN)) {
 
             type = keywordToString(tokenizer.keyWord());
-            writeToken("keyword", type);
+            emitToken("keyword", type);
             tokenizer.advance();
         } 
         else if (tokenizer.tokenType() == Type::t_IDENTIFIER) {
             type = tokenizer.identifier();
-            writeIdentifier(type, IdentifierUsage::iu_USED, IdentifierRole::ir_CLASSNAME);
+            emitIdentifier(type, IdentifierUsage::iu_USED, IdentifierRole::ir_CLASSNAME);
             tokenizer.advance();
         } 
         else {
@@ -417,20 +473,20 @@ void CompilationEngine::compileParameterList() {
 
         name = tokenizer.identifier();
         subroutine_symbol_table.define(name, type, Kind::k_ARG);
-        writeIdentifier(name, IdentifierUsage::iu_DECLARED, IdentifierRole::ir_VARLIKE);
+        emitIdentifier(name, IdentifierUsage::iu_DECLARED, IdentifierRole::ir_VARLIKE);
         tokenizer.advance();
     }
-    writeClose("parameterList");
+    emitClose("parameterList");
 }
 
 void CompilationEngine::compileSubroutineBody() {
     // '{' varDec* statements '}'
-    writeOpen("subroutineBody");
+    emitOpen("subroutineBody");
     // '{'
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != '{')
         throw std::runtime_error("Expected '{' at start of subroutineBody at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", "{");
+    emitToken("symbol", "{");
     tokenizer.advance();
 
     // varDec*
@@ -438,6 +494,24 @@ void CompilationEngine::compileSubroutineBody() {
         compileVarDec();
     }
 
+    int nVars = subroutine_symbol_table.varCount(Kind::k_VAR);
+    vmwriter.writeFunction(class_name + "." + current_subroutine_name, nVars);
+
+    // prologue depending on keyword
+    if (current_subroutine_keyword == KeyWord::kw_CONSTRUCTOR) {
+        // constructor: allocate memory for this object
+        int nFields = class_symbol_table.varCount(Kind::k_FIELD);
+
+        vmwriter.writePush("constant", nFields); // size of object
+        vmwriter.writeCall("Memory.alloc", 1); // returns base address
+        vmwriter.writePop("pointer", 0); // this = base addr
+    } 
+    else if (current_subroutine_keyword == KeyWord::kw_METHOD) {
+        // method: set 'this' to argument 0 (the object)
+        vmwriter.writePush("argument", 0);
+        vmwriter.writePop("pointer", 0);
+    }
+    
     // statements
     compileStatements();
 
@@ -445,35 +519,37 @@ void CompilationEngine::compileSubroutineBody() {
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != '}')
         throw std::runtime_error("Expected '}' at end of subroutineBody at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", "}");
+    emitToken("symbol", "}");
     tokenizer.advance();
-    writeClose("subroutineBody");
+    emitClose("subroutineBody");
 }
 
 void CompilationEngine::compileVarDec() {
     // 'var' type varName(',' varName)* ';'
-    writeOpen("varDec");
+    emitOpen("varDec");
     // 'var'
     if (tokenizer.tokenType() != Type::t_KEYWORD ||
         tokenizer.keyWord() != KeyWord::kw_VAR)
+
         throw std::runtime_error("Expected 'var' at start of varDec at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("keyword", "var");
+    emitToken("keyword", "var");
     tokenizer.advance();
 
     // type (int | char | boolean | className)
     std::string type;
     if (tokenizer.tokenType() == Type::t_KEYWORD &&
-        (tokenizer.keyWord() == KeyWord::kw_INT ||
+       (tokenizer.keyWord() == KeyWord::kw_INT ||
         tokenizer.keyWord() == KeyWord::kw_CHAR ||
         tokenizer.keyWord() == KeyWord::kw_BOOLEAN)) {
+
         type = keywordToString(tokenizer.keyWord());
-        writeToken("keyword", type);
+        emitToken("keyword", type);
         tokenizer.advance();
     }
     else if (tokenizer.tokenType() == Type::t_IDENTIFIER) {
         type = tokenizer.identifier();
-        writeIdentifier(type, IdentifierUsage::iu_USED, IdentifierRole::ir_CLASSNAME);
+        emitIdentifier(type, IdentifierUsage::iu_USED, IdentifierRole::ir_CLASSNAME);
         tokenizer.advance();
     }
     else {
@@ -486,14 +562,14 @@ void CompilationEngine::compileVarDec() {
 
     std::string name = tokenizer.identifier();
     subroutine_symbol_table.define(name, type, Kind::k_VAR);
-    writeIdentifier(name, IdentifierUsage::iu_DECLARED, IdentifierRole::ir_VARLIKE);
+    emitIdentifier(name, IdentifierUsage::iu_DECLARED, IdentifierRole::ir_VARLIKE);
     tokenizer.advance();
 
     // (',' varName)*
     while (tokenizer.tokenType() == Type::t_SYMBOL &&
         tokenizer.symbol() == ',')
     {
-        writeToken("symbol", ",");
+        emitToken("symbol", ",");
         tokenizer.advance();
 
         if (tokenizer.tokenType() != Type::t_IDENTIFIER)
@@ -501,7 +577,7 @@ void CompilationEngine::compileVarDec() {
 
         name = tokenizer.identifier();
         subroutine_symbol_table.define(name, type, Kind::k_VAR);
-        writeIdentifier(name, IdentifierUsage::iu_DECLARED, IdentifierRole::ir_VARLIKE);
+        emitIdentifier(name, IdentifierUsage::iu_DECLARED, IdentifierRole::ir_VARLIKE);
         tokenizer.advance();
     }
 
@@ -509,14 +585,14 @@ void CompilationEngine::compileVarDec() {
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != ';')
         throw std::runtime_error("Expected ';' at end of varDec at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", ";");
+    emitToken("symbol", ";");
     tokenizer.advance();
-    writeClose("varDec");
+    emitClose("varDec");
 }
 
 void CompilationEngine::compileStatements() {
     // statement*
-    writeOpen("statements");
+    emitOpen("statements");
     // letStatement|ifStatement|whileStatement|doStatement|returnStatement
     while (tokenizer.tokenType() == Type::t_KEYWORD) {
         switch (tokenizer.keyWord()) {
@@ -541,18 +617,19 @@ void CompilationEngine::compileStatements() {
                 break;
         }
     }
-    writeClose("statements");
+    emitClose("statements");
 }
 
 void CompilationEngine::compileLet() {
     // 'let' varName('[' expression ']')? '=' expression ';'
-    writeOpen("letStatement");
+    emitOpen("letStatement");
     // 'let'
     if (tokenizer.tokenType() != Type::t_KEYWORD ||
         tokenizer.keyWord() != KeyWord::kw_LET)
+
         throw std::runtime_error("Expected 'let' at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("keyword", "let");
+    emitToken("keyword", "let");
     tokenizer.advance();
 
     // varName
@@ -560,20 +637,24 @@ void CompilationEngine::compileLet() {
         throw std::runtime_error("Expected varName after 'let' at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
     std::string name = tokenizer.identifier(); 
-    writeIdentifier(name, IdentifierUsage::iu_USED, IdentifierRole::ir_VARLIKE);
+    emitIdentifier(name, IdentifierUsage::iu_USED, IdentifierRole::ir_VARLIKE);
     tokenizer.advance();
 
     // ('[' expression ']')?
+    bool isArray = false;
     if (tokenizer.tokenType() == Type::t_SYMBOL && tokenizer.symbol() == '[') {
-        writeToken("symbol", "[");
+        isArray = true;
+        emitToken("symbol", "[");
         tokenizer.advance();
 
+        pushVar(name);
         compileExpression();
+        vmwriter.writeArithmetic("add");
 
         if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != ']')
             throw std::runtime_error("Expected ']' in array indexing at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-        writeToken("symbol", "]");
+        emitToken("symbol", "]");
         tokenizer.advance();
     }
 
@@ -581,54 +662,70 @@ void CompilationEngine::compileLet() {
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != '=')
         throw std::runtime_error("Expected '=' in let statement at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", "=");
+    emitToken("symbol", "=");
     tokenizer.advance();
 
     // expression
     compileExpression();
+    if (isArray) {
+        vmwriter.writePop("temp", 0);
+        vmwriter.writePop("pointer", 1);
+        vmwriter.writePush("temp", 0);
+        vmwriter.writePop("that", 0);
+    }
+    else { popVar(name); }
 
     // ';'
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != ';')
         throw std::runtime_error("Expected ';' at end of let statement at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", ";");
+    emitToken("symbol", ";");
     tokenizer.advance();
-    writeClose("letStatement");
+    emitClose("letStatement");
 }
 
 void CompilationEngine::compileIf() {
     // 'if' '(' expression ')' '{' statements '}' ('else' '{' statements '}')?
-    writeOpen("ifStatement");
+    emitOpen("ifStatement");
     // 'if'
     if (tokenizer.tokenType() != Type::t_KEYWORD ||
         tokenizer.keyWord() != KeyWord::kw_IF)
+
         throw std::runtime_error("Expected 'if' at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("keyword", "if");
+    emitToken("keyword", "if");
     tokenizer.advance();
 
     // '('
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != '(')
         throw std::runtime_error("Expected '(' after 'if' at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", "(");
+    emitToken("symbol", "(");
     tokenizer.advance();
 
     // expression
     compileExpression();
+    // logical 'NOT', so as to negate the expression's value
+    vmwriter.writeArithmetic("not");
+    // create needed labels 
+    std::string L1 = vmwriter.getLabel();
+    std::string L2 = vmwriter.getLabel();
+    // if top is non-zero, jump L1
+    vmwriter.writeIf(L1);
+    // ... statements ...
 
     // ')'
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != ')')
         throw std::runtime_error("Expected ')' after expression in if at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", ")");
+    emitToken("symbol", ")");
     tokenizer.advance();
 
     // '{'
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != '{')
         throw std::runtime_error("Expected '{' after ')' in if at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", "{");
+    emitToken("symbol", "{");
     tokenizer.advance();
 
     // statements
@@ -638,87 +735,109 @@ void CompilationEngine::compileIf() {
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != '}')
         throw std::runtime_error("Expected '}' after if statements block at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", "}");
+    emitToken("symbol", "}");
     tokenizer.advance();
 
     // optional else block
     if (tokenizer.tokenType() == Type::t_KEYWORD &&
-        tokenizer.keyWord() == KeyWord::kw_ELSE)
-    {
+        tokenizer.keyWord() == KeyWord::kw_ELSE) {
+
+        // goto L2
+        vmwriter.writeGoto(L2);
+        // label L1
+        vmwriter.writeLabel(L1);
+        // ... statements ...
+
         // 'else'
-        writeToken("keyword", "else");
+        emitToken("keyword", "else");
         tokenizer.advance();
 
         // '{'
         if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != '{')
             throw std::runtime_error("Expected '{' after 'else' at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-        writeToken("symbol", "{");
+        emitToken("symbol", "{");
         tokenizer.advance();
 
         // statements
         compileStatements();
+        vmwriter.writeLabel(L2);
 
         // '}'
         if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != '}')
             throw std::runtime_error("Expected '}' after else statements block at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-        writeToken("symbol", "}");
+        emitToken("symbol", "}");
         tokenizer.advance();
     }
-    writeClose("ifStatement");
+    else {
+        // no else block L1 is just the end
+        vmwriter.writeLabel(L1);
+    }
+
+    emitClose("ifStatement");
 }
 
 void CompilationEngine::compileWhile() {
     // 'while' '(' expression ')' '{' statements '}'
-    writeOpen("whileStatement");
+    emitOpen("whileStatement");
     // 'while'
     if (tokenizer.tokenType() != Type::t_KEYWORD ||
         tokenizer.keyWord() != KeyWord::kw_WHILE)
+
         throw std::runtime_error("Expected 'while' at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("keyword", "while");
+    emitToken("keyword", "while");
     tokenizer.advance();
+    
+    std::string L1 = vmwriter.getLabel();
+    std::string L2 = vmwriter.getLabel();
+    vmwriter.writeLabel(L1);
 
     // '('
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != '(')
         throw std::runtime_error("Expected '(' after 'while' at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", "(");
+    emitToken("symbol", "(");
     tokenizer.advance();
 
     // expression
     compileExpression();
+    vmwriter.writeArithmetic("not");
+    vmwriter.writeIf(L2);
+    // ... statements ...
 
     // ')'
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != ')')
         throw std::runtime_error("Expected ')' after expression in while at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", ")");
+    emitToken("symbol", ")");
     tokenizer.advance();
 
     // '{'
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != '{')
         throw std::runtime_error("Expected '{' after ')' in while at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", "{");
+    emitToken("symbol", "{");
     tokenizer.advance();
 
     // statements
     compileStatements();
+    vmwriter.writeGoto(L1);
+    vmwriter.writeLabel(L2);
 
     // '}'
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != '}')
         throw std::runtime_error("Expected '}' after while statements block at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", "}");
+    emitToken("symbol", "}");
     tokenizer.advance();
-    writeClose("whileStatement");
+    emitClose("whileStatement");
 }
 
 void CompilationEngine::compileDo() {
     // 'do' subroutineCall ';'
-    writeOpen("doStatement");
+    emitOpen("doStatement");
 
     // 'do'
     if (tokenizer.tokenType() != Type::t_KEYWORD || tokenizer.keyWord() != KeyWord::kw_DO) {
@@ -726,12 +845,15 @@ void CompilationEngine::compileDo() {
             "Expected 'do' at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
     }
 
-    writeToken("keyword", "do");
+    emitToken("keyword", "do");
     tokenizer.advance();
 
     // trick: parse subroutineCall as if it were an expression
     // compileExpression() will call compileTerm(), which handles subroutineCall.
     compileExpression();
+
+    // get rid of the top most element since we just want side effects
+    vmwriter.writePop("temp", 0);
 
     // ';'
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != ';') {
@@ -739,185 +861,217 @@ void CompilationEngine::compileDo() {
             "Expected ';' after do-call at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
     }
 
-    writeToken("symbol", ";");
+    emitToken("symbol", ";");
     tokenizer.advance();
 
-    writeClose("doStatement");
+    emitClose("doStatement");
 }
 
 
 void CompilationEngine::compileReturn() {
     // 'return' expression? ';'
-    writeOpen("returnStatement");
+    emitOpen("returnStatement");
     // 'return'
     if (tokenizer.tokenType() != Type::t_KEYWORD ||
         tokenizer.keyWord() != KeyWord::kw_RETURN)
+
         throw std::runtime_error("Expected 'return' at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("keyword", "return");
+    emitToken("keyword", "return");
     tokenizer.advance();
 
     // optional expression
     // if next token is not ';', we must have an expression
     if (!(tokenizer.tokenType() == Type::t_SYMBOL && tokenizer.symbol() == ';')) {
-        compileExpression();
+        compileExpression(); // value on the stack
     }
+    else { // void return
+        vmwriter.writePush("constant", 0); // checkit
+    }
+    vmwriter.writeReturn();
 
     // ';'
     if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != ';')
         throw std::runtime_error("Expected ';' after return at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-    writeToken("symbol", ";");
+    emitToken("symbol", ";");
     tokenizer.advance();
-    writeClose("returnStatement");
+    emitClose("returnStatement");
 }
 
 void CompilationEngine::compileExpression() {
     // term (op term)*
-    writeOpen("expression");
+    emitOpen("expression");
     // term
     compileTerm();
     // (op term)*
-    while (tokenizer.tokenType() == Type::t_SYMBOL &&
-        (tokenizer.symbol() == '+' ||
-        tokenizer.symbol() == '-' ||
-        tokenizer.symbol() == '*' ||
-        tokenizer.symbol() == '/' ||
-        tokenizer.symbol() == '&' ||
-        tokenizer.symbol() == '|' ||
-        tokenizer.symbol() == '<' ||
-        tokenizer.symbol() == '>' ||
-        tokenizer.symbol() == '=')) {
-
+    while (tokenizer.tokenType() == Type::t_SYMBOL && isOpChar(tokenizer.symbol())) {
         // op
-        writeToken("symbol", std::string(1, tokenizer.symbol()));
+        char op = tokenizer.symbol();
+        emitToken("symbol", std::string(1, op));
         tokenizer.advance();
 
         // next term
         compileTerm();
+        writeOp(op);
     }
-    writeClose("expression");
+    emitClose("expression");
 }
 
 void CompilationEngine::compileTerm() {
     // integerConstant|stringConstant|keywordConstant|varName '[' expression ']'|'(' expression ')'|(unaryOp term)|subroutineCall
-    writeOpen("term");
+    emitOpen("term");
     // integerConstant
     if (tokenizer.tokenType() == Type::t_INT_CONST) {
-        writeToken("integerConstant", std::to_string(tokenizer.intVal()));
+
+        int value = tokenizer.intVal();
+        emitToken("integerConstant", std::to_string(value));
+        vmwriter.writePush("constant", value);
         tokenizer.advance();
     }
 
     // stringConstant
     else if (tokenizer.tokenType() == Type::t_STRING_CONST) {
-        writeToken("stringConstant", tokenizer.stringVal());
+
+        std::string s = tokenizer.stringVal();
+        emitToken("stringConstant", s);
         tokenizer.advance();
+
+        // on vm side construct string with OS functions
+        vmwriter.VMWriter::writePush("constant", static_cast<int>(s.size())); // size of string
+        vmwriter.VMWriter::writeCall("String.new", 1); // OS call with 1 argument (size of string)
+        for (char c : s) {
+            vmwriter.VMWriter::writePush("constant", static_cast<int>(static_cast<unsigned char>(c)));
+            vmwriter.VMWriter::writeCall("String.appendChar", 2);
+        }
     }
 
     // keywordConstant
     else if (tokenizer.tokenType() == Type::t_KEYWORD &&
-    (tokenizer.keyWord() == KeyWord::kw_TRUE ||
-        tokenizer.keyWord() == KeyWord::kw_FALSE ||
-        tokenizer.keyWord() == KeyWord::kw_NULL ||
-        tokenizer.keyWord() == KeyWord::kw_THIS)) {
-
-        writeToken("keyword", keywordToString(tokenizer.keyWord()));
+            (tokenizer.keyWord() == KeyWord::kw_TRUE ||
+             tokenizer.keyWord() == KeyWord::kw_FALSE ||
+             tokenizer.keyWord() == KeyWord::kw_NULL ||
+             tokenizer.keyWord() == KeyWord::kw_THIS)) {
+ 
+        KeyWord kw = tokenizer.keyWord();
+        emitToken("keyword", keywordToString(kw));
         tokenizer.advance();
+
+        switch (kw) {
+            case KeyWord::kw_TRUE:
+                // true is -1
+                vmwriter.VMWriter::writePush("constant", 0);
+                vmwriter.VMWriter::writeArithmetic("not");
+                break;
+            case KeyWord::kw_FALSE: vmwriter.VMWriter::writePush("constant", 0); break;
+            case KeyWord::kw_NULL: vmwriter.VMWriter::writePush("constant", 0); break;
+            case KeyWord::kw_THIS: vmwriter.VMWriter::writePush("pointer", 0); break;
+            default: break;
+        }
     }
 
     // '(' expression ')'
     else if (tokenizer.tokenType() == Type::t_SYMBOL &&
-        tokenizer.symbol() == '(') {
+             tokenizer.symbol() == '(') {
 
-        writeToken("symbol", "(");
+        emitToken("symbol", "(");
         tokenizer.advance();
-
         compileExpression();
 
         if (tokenizer.tokenType() != Type::t_SYMBOL ||
             tokenizer.symbol() != ')')
             throw std::runtime_error("Expected ')' at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
 
-        writeToken("symbol", ")");
+        emitToken("symbol", ")");
         tokenizer.advance();
     }
 
     // unaryOp term
     else if (tokenizer.tokenType() == Type::t_SYMBOL &&
-    (tokenizer.symbol() == '-' || tokenizer.symbol() == '~')) {
+            (tokenizer.symbol() == '-' || tokenizer.symbol() == '~')) {
 
-        writeToken("symbol", std::string(1, tokenizer.symbol()));
+        char op = tokenizer.symbol();
+        emitToken("symbol", std::string(1, op));
         tokenizer.advance();
         compileTerm();
+        writeUnaryOp(op);
     }
 
-    // IDENTIFIER: varName | array access | subroutineCall
+    // varName | array access | subroutineCall
     else if (tokenizer.tokenType() == Type::t_IDENTIFIER) {
 
         std::string name = tokenizer.identifier();
         tokenizer.advance();
 
-        // Lookahead: '[' vs '(' vs '.' vs plain varName
         if (tokenizer.tokenType() == Type::t_SYMBOL &&
             tokenizer.symbol() == '[') {
+
             // name '[' expression ']'
             // 'name' must be a var-like identifier
-            writeIdentifier(name, IdentifierUsage::iu_USED, IdentifierRole::ir_VARLIKE);
-
-            writeToken("symbol", "[");
+            emitIdentifier(name, IdentifierUsage::iu_USED, IdentifierRole::ir_VARLIKE);
+            emitToken("symbol", "[");
             tokenizer.advance();
-
+            // base address
+            pushVar(name);
+            // index
             compileExpression();
+            // base + index
+            vmwriter.VMWriter::writeArithmetic("add");
 
             if (tokenizer.tokenType() != Type::t_SYMBOL ||
-                tokenizer.symbol() != ']') {
+            tokenizer.symbol() != ']') {
                 throw std::runtime_error(
                     "Expected ']' in array indexing at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
             }
 
-            writeToken("symbol", "]");
+            emitToken("symbol", "]");
             tokenizer.advance();
+            // *that 0
+            vmwriter.VMWriter::writePop("pointer", 1);
+            vmwriter.VMWriter::writePush("that", 0);
         }
         else if (tokenizer.tokenType() == Type::t_SYMBOL &&
                  tokenizer.symbol() == '(') {
+
             // subroutineName '(' expressionList ')'
-            // 'name' is a subroutineName in the current class
-            writeIdentifier(name, IdentifierUsage::iu_USED, IdentifierRole::ir_SUBROUTINENAME);
-
-            writeToken("symbol", "(");
+            emitIdentifier(name, IdentifierUsage::iu_USED, IdentifierRole::ir_SUBROUTINENAME);
+            emitToken("symbol", "(");
             tokenizer.advance();
-
-            compileExpressionList();
+            // push this
+            vmwriter.VMWriter::writePush("pointer", 0);
+            int nArgs = compileExpressionList();
 
             if (tokenizer.tokenType() != Type::t_SYMBOL ||
                 tokenizer.symbol() != ')') {
+
                 throw std::runtime_error(
                     "Expected ')' after expressionList at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
             }
 
-            writeToken("symbol", ")");
+            emitToken("symbol", ")");
             tokenizer.advance();
+            vmwriter.VMWriter::writeCall(class_name + "." + name, nArgs + 1);
         }
         else if (tokenizer.tokenType() == Type::t_SYMBOL &&
                  tokenizer.symbol() == '.') {
             // (className | varName) '.' subroutineName '(' expressionList ')'
-
             // decide if 'name' is a className or a var-like symbol
             Kind k = subroutine_symbol_table.kindOf(name);
-            if (k == Kind::k_NONE) {
+            bool isVar = (k != Kind::k_NONE);
+            if (!isVar)
                 k = class_symbol_table.kindOf(name);
-            }
 
-            if (k == Kind::k_NONE) {
+            if (!isVar && k == Kind::k_NONE) {
                 // treat as className
-                writeIdentifier(name, IdentifierUsage::iu_USED, IdentifierRole::ir_CLASSNAME);
+                emitIdentifier(name, IdentifierUsage::iu_USED, IdentifierRole::ir_CLASSNAME);
             } 
             else {
-                // found in a table: var/field/arg/static
-                writeIdentifier(name, IdentifierUsage::iu_USED, IdentifierRole::ir_VARLIKE);
+                emitIdentifier(name, IdentifierUsage::iu_USED, IdentifierRole::ir_VARLIKE);
+                // push object reference
+                pushVar(name);
             }
 
-            writeToken("symbol", ".");
+            emitToken("symbol", ".");
             tokenizer.advance();
 
             if (tokenizer.tokenType() != Type::t_IDENTIFIER) {
@@ -926,51 +1080,63 @@ void CompilationEngine::compileTerm() {
             }
 
             std::string subName = tokenizer.identifier();
-            writeIdentifier(subName, IdentifierUsage::iu_USED, IdentifierRole::ir_SUBROUTINENAME);
+            emitIdentifier(subName, IdentifierUsage::iu_USED, IdentifierRole::ir_SUBROUTINENAME);
             tokenizer.advance();
 
-            if (tokenizer.tokenType() != Type::t_SYMBOL ||
-                tokenizer.symbol() != '(') {
+            if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != '(') {
                 throw std::runtime_error(
                     "Expected '(' after subroutineName at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
             }
 
-            writeToken("symbol", "(");
+            emitToken("symbol", "(");
             tokenizer.advance();
+            int nArgs = compileExpressionList();
 
-            compileExpressionList();
-
-            if (tokenizer.tokenType() != Type::t_SYMBOL ||
-                tokenizer.symbol() != ')') {
+            if (tokenizer.tokenType() != Type::t_SYMBOL || tokenizer.symbol() != ')') {
                 throw std::runtime_error("Expected ')' after expressionList at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
             }
 
-            writeToken("symbol", ")");
+            emitToken("symbol", ")");
             tokenizer.advance();
+            int totalArgs = nArgs;
+            std::string fullName;
+
+            if (!isVar && k == Kind::k_NONE) {
+                // class call
+                fullName = name + "." + subName;
+            } 
+            else {
+                // method call on object var
+                std::string type = (subroutine_symbol_table.kindOf(name) != Kind::k_NONE)
+                    ? subroutine_symbol_table.typeOf(name) : class_symbol_table.typeOf(name);
+
+                fullName = type + "." + subName;
+                totalArgs = nArgs + 1; // implicit object ref already pushed
+            }
+
+            vmwriter.VMWriter::writeCall(fullName, totalArgs);
         }
         else {
             // plain varName
-            writeIdentifier(name, IdentifierUsage::iu_USED, IdentifierRole::ir_VARLIKE);
+            emitIdentifier(name, IdentifierUsage::iu_USED, IdentifierRole::ir_VARLIKE);
+            pushVar(name);
         }
     }
     else {
-        throw std::runtime_error(
-            "Invalid term at line " +
-            std::to_string(tokenizer.line_number) + ".\n > " +
-            tokenizer.current_line + ".\n");
+        throw std::runtime_error( "Invalid term at line " + std::to_string(tokenizer.line_number) + ".\n > " + tokenizer.current_line + ".\n");
     }
 
-    writeClose("term");
+    emitClose("term");
 }
 
 int CompilationEngine::compileExpressionList() {
     // (expression(',' expression)*)?
-    writeOpen("expressionList");
+    emitOpen("expressionList");
     size_t count = 0;
     // empty? next token must be ')'
     if (tokenizer.tokenType() == Type::t_SYMBOL &&
         tokenizer.symbol() == ')') {
-        writeClose("expressionList");
+        emitClose("expressionList");
         return 0;
     }
 
@@ -981,11 +1147,11 @@ int CompilationEngine::compileExpressionList() {
     // (',' expression)*
     while (tokenizer.tokenType() == Type::t_SYMBOL &&
         tokenizer.symbol() == ',') {
-        writeToken("symbol", ",");
+        emitToken("symbol", ",");
         tokenizer.advance();
         compileExpression();
         ++count;
     }
-    writeClose("expressionList");
+    emitClose("expressionList");
     return count;
 }

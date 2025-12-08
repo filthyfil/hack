@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <filesystem>
 #include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
@@ -25,7 +26,7 @@ enum class KeyWord {
 
 class JackTokenizer {
 public:
-    JackTokenizer(const std::string& file);
+    JackTokenizer(std::filesystem::path file, bool emit_xml = false);
     ~JackTokenizer();
 
     bool hasMoreTokens();
@@ -43,9 +44,8 @@ public:
     std::string stringVal();
 
     std::ifstream jack_file;
-    std::string jack_file_name;
     std::ofstream t_xml_file;
-    std::string base;
+    std::filesystem::path path;
 
     std::string current_line;
     unsigned int line_number;
@@ -55,6 +55,7 @@ private:
     Type current_type;
     KeyWord current_keyword;
     bool in_comment_block = false;
+    bool emit_xml_flag = false;
     static std::string trim(const std::string &s);
 
     void commentAnalyzer();

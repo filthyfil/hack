@@ -1,0 +1,1899 @@
+<class>
+	<keyword> class </keyword>
+	<identifier name="Ball" category="class" index="-1" usage="declared"></identifier>
+	<symbol> { </symbol>
+	<classVarDec>
+		<keyword> field </keyword>
+		<keyword> int </keyword>
+		<identifier name="x" category="field" index="0" usage="declared"></identifier>
+		<symbol> , </symbol>
+		<identifier name="y" category="field" index="1" usage="declared"></identifier>
+		<symbol> ; </symbol>
+	</classVarDec>
+	<classVarDec>
+		<keyword> field </keyword>
+		<keyword> int </keyword>
+		<identifier name="lengthx" category="field" index="2" usage="declared"></identifier>
+		<symbol> , </symbol>
+		<identifier name="lengthy" category="field" index="3" usage="declared"></identifier>
+		<symbol> ; </symbol>
+	</classVarDec>
+	<classVarDec>
+		<keyword> field </keyword>
+		<keyword> int </keyword>
+		<identifier name="d" category="field" index="4" usage="declared"></identifier>
+		<symbol> , </symbol>
+		<identifier name="straightD" category="field" index="5" usage="declared"></identifier>
+		<symbol> , </symbol>
+		<identifier name="diagonalD" category="field" index="6" usage="declared"></identifier>
+		<symbol> ; </symbol>
+	</classVarDec>
+	<classVarDec>
+		<keyword> field </keyword>
+		<keyword> boolean </keyword>
+		<identifier name="invert" category="field" index="7" usage="declared"></identifier>
+		<symbol> , </symbol>
+		<identifier name="positivex" category="field" index="8" usage="declared"></identifier>
+		<symbol> , </symbol>
+		<identifier name="positivey" category="field" index="9" usage="declared"></identifier>
+		<symbol> ; </symbol>
+	</classVarDec>
+	<classVarDec>
+		<keyword> field </keyword>
+		<keyword> int </keyword>
+		<identifier name="leftWall" category="field" index="10" usage="declared"></identifier>
+		<symbol> , </symbol>
+		<identifier name="rightWall" category="field" index="11" usage="declared"></identifier>
+		<symbol> , </symbol>
+		<identifier name="topWall" category="field" index="12" usage="declared"></identifier>
+		<symbol> , </symbol>
+		<identifier name="bottomWall" category="field" index="13" usage="declared"></identifier>
+		<symbol> ; </symbol>
+	</classVarDec>
+	<classVarDec>
+		<keyword> field </keyword>
+		<keyword> int </keyword>
+		<identifier name="wall" category="field" index="14" usage="declared"></identifier>
+		<symbol> ; </symbol>
+	</classVarDec>
+	<subroutineDec>
+		<keyword> constructor </keyword>
+		<identifier name="Ball" category="class" index="-1" usage="used"></identifier>
+		<identifier name="new" category="subroutine" index="-1" usage="declared"></identifier>
+		<symbol> ( </symbol>
+		<parameterList>
+			<keyword> int </keyword>
+			<identifier name="Ax" category="arg" index="0" usage="declared"></identifier>
+			<symbol> , </symbol>
+			<keyword> int </keyword>
+			<identifier name="Ay" category="arg" index="1" usage="declared"></identifier>
+			<symbol> , </symbol>
+			<keyword> int </keyword>
+			<identifier name="AleftWall" category="arg" index="2" usage="declared"></identifier>
+			<symbol> , </symbol>
+			<keyword> int </keyword>
+			<identifier name="ArightWall" category="arg" index="3" usage="declared"></identifier>
+			<symbol> , </symbol>
+			<keyword> int </keyword>
+			<identifier name="AtopWall" category="arg" index="4" usage="declared"></identifier>
+			<symbol> , </symbol>
+			<keyword> int </keyword>
+			<identifier name="AbottomWall" category="arg" index="5" usage="declared"></identifier>
+		</parameterList>
+		<symbol> ) </symbol>
+		<subroutineBody>
+			<symbol> { </symbol>
+			<statements>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="x" category="field" index="0" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<identifier name="Ax" category="arg" index="0" usage="used"></identifier>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="y" category="field" index="1" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<identifier name="Ay" category="arg" index="1" usage="used"></identifier>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="leftWall" category="field" index="10" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<identifier name="AleftWall" category="arg" index="2" usage="used"></identifier>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="rightWall" category="field" index="11" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<identifier name="ArightWall" category="arg" index="3" usage="used"></identifier>
+						</term>
+						<symbol> - </symbol>
+						<term>
+							<integerConstant> 6 </integerConstant>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="topWall" category="field" index="12" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<identifier name="AtopWall" category="arg" index="4" usage="used"></identifier>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="bottomWall" category="field" index="13" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<identifier name="AbottomWall" category="arg" index="5" usage="used"></identifier>
+						</term>
+						<symbol> - </symbol>
+						<term>
+							<integerConstant> 6 </integerConstant>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="wall" category="field" index="14" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<integerConstant> 0 </integerConstant>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<doStatement>
+					<keyword> do </keyword>
+					<expression>
+						<term>
+							<identifier name="show" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</doStatement>
+				<returnStatement>
+					<keyword> return </keyword>
+					<expression>
+						<term>
+							<keyword> this </keyword>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</returnStatement>
+			</statements>
+			<symbol> } </symbol>
+		</subroutineBody>
+	</subroutineDec>
+	<subroutineDec>
+		<keyword> method </keyword>
+		<keyword> void </keyword>
+		<identifier name="dispose" category="subroutine" index="-1" usage="declared"></identifier>
+		<symbol> ( </symbol>
+		<parameterList>
+		</parameterList>
+		<symbol> ) </symbol>
+		<subroutineBody>
+			<symbol> { </symbol>
+			<statements>
+				<doStatement>
+					<keyword> do </keyword>
+					<expression>
+						<term>
+							<identifier name="Memory" category="class" index="-1" usage="used"></identifier>
+							<symbol> . </symbol>
+							<identifier name="deAlloc" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+								<expression>
+									<term>
+										<keyword> this </keyword>
+									</term>
+								</expression>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</doStatement>
+				<returnStatement>
+					<keyword> return </keyword>
+					<symbol> ; </symbol>
+				</returnStatement>
+			</statements>
+			<symbol> } </symbol>
+		</subroutineBody>
+	</subroutineDec>
+	<subroutineDec>
+		<keyword> method </keyword>
+		<keyword> void </keyword>
+		<identifier name="show" category="subroutine" index="-1" usage="declared"></identifier>
+		<symbol> ( </symbol>
+		<parameterList>
+		</parameterList>
+		<symbol> ) </symbol>
+		<subroutineBody>
+			<symbol> { </symbol>
+			<statements>
+				<doStatement>
+					<keyword> do </keyword>
+					<expression>
+						<term>
+							<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+							<symbol> . </symbol>
+							<identifier name="setColor" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+								<expression>
+									<term>
+										<keyword> true </keyword>
+									</term>
+								</expression>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</doStatement>
+				<doStatement>
+					<keyword> do </keyword>
+					<expression>
+						<term>
+							<identifier name="draw" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</doStatement>
+				<returnStatement>
+					<keyword> return </keyword>
+					<symbol> ; </symbol>
+				</returnStatement>
+			</statements>
+			<symbol> } </symbol>
+		</subroutineBody>
+	</subroutineDec>
+	<subroutineDec>
+		<keyword> method </keyword>
+		<keyword> void </keyword>
+		<identifier name="hide" category="subroutine" index="-1" usage="declared"></identifier>
+		<symbol> ( </symbol>
+		<parameterList>
+		</parameterList>
+		<symbol> ) </symbol>
+		<subroutineBody>
+			<symbol> { </symbol>
+			<statements>
+				<doStatement>
+					<keyword> do </keyword>
+					<expression>
+						<term>
+							<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+							<symbol> . </symbol>
+							<identifier name="setColor" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+								<expression>
+									<term>
+										<keyword> false </keyword>
+									</term>
+								</expression>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</doStatement>
+				<doStatement>
+					<keyword> do </keyword>
+					<expression>
+						<term>
+							<identifier name="draw" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</doStatement>
+				<returnStatement>
+					<keyword> return </keyword>
+					<symbol> ; </symbol>
+				</returnStatement>
+			</statements>
+			<symbol> } </symbol>
+		</subroutineBody>
+	</subroutineDec>
+	<subroutineDec>
+		<keyword> method </keyword>
+		<keyword> void </keyword>
+		<identifier name="draw" category="subroutine" index="-1" usage="declared"></identifier>
+		<symbol> ( </symbol>
+		<parameterList>
+		</parameterList>
+		<symbol> ) </symbol>
+		<subroutineBody>
+			<symbol> { </symbol>
+			<statements>
+				<doStatement>
+					<keyword> do </keyword>
+					<expression>
+						<term>
+							<identifier name="Screen" category="class" index="-1" usage="used"></identifier>
+							<symbol> . </symbol>
+							<identifier name="drawRectangle" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+								<expression>
+									<term>
+										<identifier name="x" category="field" index="0" usage="used"></identifier>
+									</term>
+								</expression>
+								<symbol> , </symbol>
+								<expression>
+									<term>
+										<identifier name="y" category="field" index="1" usage="used"></identifier>
+									</term>
+								</expression>
+								<symbol> , </symbol>
+								<expression>
+									<term>
+										<identifier name="x" category="field" index="0" usage="used"></identifier>
+									</term>
+									<symbol> + </symbol>
+									<term>
+										<integerConstant> 5 </integerConstant>
+									</term>
+								</expression>
+								<symbol> , </symbol>
+								<expression>
+									<term>
+										<identifier name="y" category="field" index="1" usage="used"></identifier>
+									</term>
+									<symbol> + </symbol>
+									<term>
+										<integerConstant> 5 </integerConstant>
+									</term>
+								</expression>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</doStatement>
+				<returnStatement>
+					<keyword> return </keyword>
+					<symbol> ; </symbol>
+				</returnStatement>
+			</statements>
+			<symbol> } </symbol>
+		</subroutineBody>
+	</subroutineDec>
+	<subroutineDec>
+		<keyword> method </keyword>
+		<keyword> int </keyword>
+		<identifier name="getLeft" category="subroutine" index="-1" usage="declared"></identifier>
+		<symbol> ( </symbol>
+		<parameterList>
+		</parameterList>
+		<symbol> ) </symbol>
+		<subroutineBody>
+			<symbol> { </symbol>
+			<statements>
+				<returnStatement>
+					<keyword> return </keyword>
+					<expression>
+						<term>
+							<identifier name="x" category="field" index="0" usage="used"></identifier>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</returnStatement>
+			</statements>
+			<symbol> } </symbol>
+		</subroutineBody>
+	</subroutineDec>
+	<subroutineDec>
+		<keyword> method </keyword>
+		<keyword> int </keyword>
+		<identifier name="getRight" category="subroutine" index="-1" usage="declared"></identifier>
+		<symbol> ( </symbol>
+		<parameterList>
+		</parameterList>
+		<symbol> ) </symbol>
+		<subroutineBody>
+			<symbol> { </symbol>
+			<statements>
+				<returnStatement>
+					<keyword> return </keyword>
+					<expression>
+						<term>
+							<identifier name="x" category="field" index="0" usage="used"></identifier>
+						</term>
+						<symbol> + </symbol>
+						<term>
+							<integerConstant> 5 </integerConstant>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</returnStatement>
+			</statements>
+			<symbol> } </symbol>
+		</subroutineBody>
+	</subroutineDec>
+	<subroutineDec>
+		<keyword> method </keyword>
+		<keyword> void </keyword>
+		<identifier name="setDestination" category="subroutine" index="-1" usage="declared"></identifier>
+		<symbol> ( </symbol>
+		<parameterList>
+			<keyword> int </keyword>
+			<identifier name="destx" category="arg" index="1" usage="declared"></identifier>
+			<symbol> , </symbol>
+			<keyword> int </keyword>
+			<identifier name="desty" category="arg" index="2" usage="declared"></identifier>
+		</parameterList>
+		<symbol> ) </symbol>
+		<subroutineBody>
+			<symbol> { </symbol>
+			<varDec>
+				<keyword> var </keyword>
+				<keyword> int </keyword>
+				<identifier name="dx" category="var" index="0" usage="declared"></identifier>
+				<symbol> , </symbol>
+				<identifier name="dy" category="var" index="1" usage="declared"></identifier>
+				<symbol> , </symbol>
+				<identifier name="temp" category="var" index="2" usage="declared"></identifier>
+				<symbol> ; </symbol>
+			</varDec>
+			<statements>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="lengthx" category="field" index="2" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<identifier name="destx" category="arg" index="1" usage="used"></identifier>
+						</term>
+						<symbol> - </symbol>
+						<term>
+							<identifier name="x" category="field" index="0" usage="used"></identifier>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="lengthy" category="field" index="3" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<identifier name="desty" category="arg" index="2" usage="used"></identifier>
+						</term>
+						<symbol> - </symbol>
+						<term>
+							<identifier name="y" category="field" index="1" usage="used"></identifier>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="dx" category="var" index="0" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<identifier name="Math" category="class" index="-1" usage="used"></identifier>
+							<symbol> . </symbol>
+							<identifier name="abs" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+								<expression>
+									<term>
+										<identifier name="lengthx" category="field" index="2" usage="used"></identifier>
+									</term>
+								</expression>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="dy" category="var" index="1" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<identifier name="Math" category="class" index="-1" usage="used"></identifier>
+							<symbol> . </symbol>
+							<identifier name="abs" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+								<expression>
+									<term>
+										<identifier name="lengthy" category="field" index="3" usage="used"></identifier>
+									</term>
+								</expression>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="invert" category="field" index="7" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<symbol> ( </symbol>
+							<expression>
+								<term>
+									<identifier name="dx" category="var" index="0" usage="used"></identifier>
+								</term>
+								<symbol> &lt; </symbol>
+								<term>
+									<identifier name="dy" category="var" index="1" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<ifStatement>
+					<keyword> if </keyword>
+					<symbol> ( </symbol>
+					<expression>
+						<term>
+							<identifier name="invert" category="field" index="7" usage="used"></identifier>
+						</term>
+					</expression>
+					<symbol> ) </symbol>
+					<symbol> { </symbol>
+					<statements>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="temp" category="var" index="2" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<identifier name="dx" category="var" index="0" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="dx" category="var" index="0" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<identifier name="dy" category="var" index="1" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="dy" category="var" index="1" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<identifier name="temp" category="var" index="2" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="positivex" category="field" index="8" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<symbol> ( </symbol>
+									<expression>
+										<term>
+											<identifier name="y" category="field" index="1" usage="used"></identifier>
+										</term>
+										<symbol> &lt; </symbol>
+										<term>
+											<identifier name="desty" category="arg" index="2" usage="used"></identifier>
+										</term>
+									</expression>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="positivey" category="field" index="9" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<symbol> ( </symbol>
+									<expression>
+										<term>
+											<identifier name="x" category="field" index="0" usage="used"></identifier>
+										</term>
+										<symbol> &lt; </symbol>
+										<term>
+											<identifier name="destx" category="arg" index="1" usage="used"></identifier>
+										</term>
+									</expression>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+					</statements>
+					<symbol> } </symbol>
+					<keyword> else </keyword>
+					<symbol> { </symbol>
+					<statements>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="positivex" category="field" index="8" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<symbol> ( </symbol>
+									<expression>
+										<term>
+											<identifier name="x" category="field" index="0" usage="used"></identifier>
+										</term>
+										<symbol> &lt; </symbol>
+										<term>
+											<identifier name="destx" category="arg" index="1" usage="used"></identifier>
+										</term>
+									</expression>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="positivey" category="field" index="9" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<symbol> ( </symbol>
+									<expression>
+										<term>
+											<identifier name="y" category="field" index="1" usage="used"></identifier>
+										</term>
+										<symbol> &lt; </symbol>
+										<term>
+											<identifier name="desty" category="arg" index="2" usage="used"></identifier>
+										</term>
+									</expression>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+					</statements>
+					<symbol> } </symbol>
+				</ifStatement>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="d" category="field" index="4" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<symbol> ( </symbol>
+							<expression>
+								<term>
+									<integerConstant> 2 </integerConstant>
+								</term>
+								<symbol> * </symbol>
+								<term>
+									<identifier name="dy" category="var" index="1" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ) </symbol>
+						</term>
+						<symbol> - </symbol>
+						<term>
+							<identifier name="dx" category="var" index="0" usage="used"></identifier>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="straightD" category="field" index="5" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<integerConstant> 2 </integerConstant>
+						</term>
+						<symbol> * </symbol>
+						<term>
+							<identifier name="dy" category="var" index="1" usage="used"></identifier>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="diagonalD" category="field" index="6" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<integerConstant> 2 </integerConstant>
+						</term>
+						<symbol> * </symbol>
+						<term>
+							<symbol> ( </symbol>
+							<expression>
+								<term>
+									<identifier name="dy" category="var" index="1" usage="used"></identifier>
+								</term>
+								<symbol> - </symbol>
+								<term>
+									<identifier name="dx" category="var" index="0" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<returnStatement>
+					<keyword> return </keyword>
+					<symbol> ; </symbol>
+				</returnStatement>
+			</statements>
+			<symbol> } </symbol>
+		</subroutineBody>
+	</subroutineDec>
+	<subroutineDec>
+		<keyword> method </keyword>
+		<keyword> int </keyword>
+		<identifier name="move" category="subroutine" index="-1" usage="declared"></identifier>
+		<symbol> ( </symbol>
+		<parameterList>
+		</parameterList>
+		<symbol> ) </symbol>
+		<subroutineBody>
+			<symbol> { </symbol>
+			<statements>
+				<doStatement>
+					<keyword> do </keyword>
+					<expression>
+						<term>
+							<identifier name="hide" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</doStatement>
+				<ifStatement>
+					<keyword> if </keyword>
+					<symbol> ( </symbol>
+					<expression>
+						<term>
+							<identifier name="d" category="field" index="4" usage="used"></identifier>
+						</term>
+						<symbol> &lt; </symbol>
+						<term>
+							<integerConstant> 0 </integerConstant>
+						</term>
+					</expression>
+					<symbol> ) </symbol>
+					<symbol> { </symbol>
+					<statements>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="d" category="field" index="4" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<identifier name="d" category="field" index="4" usage="used"></identifier>
+								</term>
+								<symbol> + </symbol>
+								<term>
+									<identifier name="straightD" category="field" index="5" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+					</statements>
+					<symbol> } </symbol>
+					<keyword> else </keyword>
+					<symbol> { </symbol>
+					<statements>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="d" category="field" index="4" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<identifier name="d" category="field" index="4" usage="used"></identifier>
+								</term>
+								<symbol> + </symbol>
+								<term>
+									<identifier name="diagonalD" category="field" index="6" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+						<ifStatement>
+							<keyword> if </keyword>
+							<symbol> ( </symbol>
+							<expression>
+								<term>
+									<identifier name="positivey" category="field" index="9" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ) </symbol>
+							<symbol> { </symbol>
+							<statements>
+								<ifStatement>
+									<keyword> if </keyword>
+									<symbol> ( </symbol>
+									<expression>
+										<term>
+											<identifier name="invert" category="field" index="7" usage="used"></identifier>
+										</term>
+									</expression>
+									<symbol> ) </symbol>
+									<symbol> { </symbol>
+									<statements>
+										<letStatement>
+											<keyword> let </keyword>
+											<identifier name="x" category="field" index="0" usage="used"></identifier>
+											<symbol> = </symbol>
+											<expression>
+												<term>
+													<identifier name="x" category="field" index="0" usage="used"></identifier>
+												</term>
+												<symbol> + </symbol>
+												<term>
+													<integerConstant> 4 </integerConstant>
+												</term>
+											</expression>
+											<symbol> ; </symbol>
+										</letStatement>
+									</statements>
+									<symbol> } </symbol>
+									<keyword> else </keyword>
+									<symbol> { </symbol>
+									<statements>
+										<letStatement>
+											<keyword> let </keyword>
+											<identifier name="y" category="field" index="1" usage="used"></identifier>
+											<symbol> = </symbol>
+											<expression>
+												<term>
+													<identifier name="y" category="field" index="1" usage="used"></identifier>
+												</term>
+												<symbol> + </symbol>
+												<term>
+													<integerConstant> 4 </integerConstant>
+												</term>
+											</expression>
+											<symbol> ; </symbol>
+										</letStatement>
+									</statements>
+									<symbol> } </symbol>
+								</ifStatement>
+							</statements>
+							<symbol> } </symbol>
+							<keyword> else </keyword>
+							<symbol> { </symbol>
+							<statements>
+								<ifStatement>
+									<keyword> if </keyword>
+									<symbol> ( </symbol>
+									<expression>
+										<term>
+											<identifier name="invert" category="field" index="7" usage="used"></identifier>
+										</term>
+									</expression>
+									<symbol> ) </symbol>
+									<symbol> { </symbol>
+									<statements>
+										<letStatement>
+											<keyword> let </keyword>
+											<identifier name="x" category="field" index="0" usage="used"></identifier>
+											<symbol> = </symbol>
+											<expression>
+												<term>
+													<identifier name="x" category="field" index="0" usage="used"></identifier>
+												</term>
+												<symbol> - </symbol>
+												<term>
+													<integerConstant> 4 </integerConstant>
+												</term>
+											</expression>
+											<symbol> ; </symbol>
+										</letStatement>
+									</statements>
+									<symbol> } </symbol>
+									<keyword> else </keyword>
+									<symbol> { </symbol>
+									<statements>
+										<letStatement>
+											<keyword> let </keyword>
+											<identifier name="y" category="field" index="1" usage="used"></identifier>
+											<symbol> = </symbol>
+											<expression>
+												<term>
+													<identifier name="y" category="field" index="1" usage="used"></identifier>
+												</term>
+												<symbol> - </symbol>
+												<term>
+													<integerConstant> 4 </integerConstant>
+												</term>
+											</expression>
+											<symbol> ; </symbol>
+										</letStatement>
+									</statements>
+									<symbol> } </symbol>
+								</ifStatement>
+							</statements>
+							<symbol> } </symbol>
+						</ifStatement>
+					</statements>
+					<symbol> } </symbol>
+				</ifStatement>
+				<ifStatement>
+					<keyword> if </keyword>
+					<symbol> ( </symbol>
+					<expression>
+						<term>
+							<identifier name="positivex" category="field" index="8" usage="used"></identifier>
+						</term>
+					</expression>
+					<symbol> ) </symbol>
+					<symbol> { </symbol>
+					<statements>
+						<ifStatement>
+							<keyword> if </keyword>
+							<symbol> ( </symbol>
+							<expression>
+								<term>
+									<identifier name="invert" category="field" index="7" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ) </symbol>
+							<symbol> { </symbol>
+							<statements>
+								<letStatement>
+									<keyword> let </keyword>
+									<identifier name="y" category="field" index="1" usage="used"></identifier>
+									<symbol> = </symbol>
+									<expression>
+										<term>
+											<identifier name="y" category="field" index="1" usage="used"></identifier>
+										</term>
+										<symbol> + </symbol>
+										<term>
+											<integerConstant> 4 </integerConstant>
+										</term>
+									</expression>
+									<symbol> ; </symbol>
+								</letStatement>
+							</statements>
+							<symbol> } </symbol>
+							<keyword> else </keyword>
+							<symbol> { </symbol>
+							<statements>
+								<letStatement>
+									<keyword> let </keyword>
+									<identifier name="x" category="field" index="0" usage="used"></identifier>
+									<symbol> = </symbol>
+									<expression>
+										<term>
+											<identifier name="x" category="field" index="0" usage="used"></identifier>
+										</term>
+										<symbol> + </symbol>
+										<term>
+											<integerConstant> 4 </integerConstant>
+										</term>
+									</expression>
+									<symbol> ; </symbol>
+								</letStatement>
+							</statements>
+							<symbol> } </symbol>
+						</ifStatement>
+					</statements>
+					<symbol> } </symbol>
+					<keyword> else </keyword>
+					<symbol> { </symbol>
+					<statements>
+						<ifStatement>
+							<keyword> if </keyword>
+							<symbol> ( </symbol>
+							<expression>
+								<term>
+									<identifier name="invert" category="field" index="7" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ) </symbol>
+							<symbol> { </symbol>
+							<statements>
+								<letStatement>
+									<keyword> let </keyword>
+									<identifier name="y" category="field" index="1" usage="used"></identifier>
+									<symbol> = </symbol>
+									<expression>
+										<term>
+											<identifier name="y" category="field" index="1" usage="used"></identifier>
+										</term>
+										<symbol> - </symbol>
+										<term>
+											<integerConstant> 4 </integerConstant>
+										</term>
+									</expression>
+									<symbol> ; </symbol>
+								</letStatement>
+							</statements>
+							<symbol> } </symbol>
+							<keyword> else </keyword>
+							<symbol> { </symbol>
+							<statements>
+								<letStatement>
+									<keyword> let </keyword>
+									<identifier name="x" category="field" index="0" usage="used"></identifier>
+									<symbol> = </symbol>
+									<expression>
+										<term>
+											<identifier name="x" category="field" index="0" usage="used"></identifier>
+										</term>
+										<symbol> - </symbol>
+										<term>
+											<integerConstant> 4 </integerConstant>
+										</term>
+									</expression>
+									<symbol> ; </symbol>
+								</letStatement>
+							</statements>
+							<symbol> } </symbol>
+						</ifStatement>
+					</statements>
+					<symbol> } </symbol>
+				</ifStatement>
+				<ifStatement>
+					<keyword> if </keyword>
+					<symbol> ( </symbol>
+					<expression>
+						<term>
+							<symbol> ~ </symbol>
+							<term>
+								<symbol> ( </symbol>
+								<expression>
+									<term>
+										<identifier name="x" category="field" index="0" usage="used"></identifier>
+									</term>
+									<symbol> &gt; </symbol>
+									<term>
+										<identifier name="leftWall" category="field" index="10" usage="used"></identifier>
+									</term>
+								</expression>
+								<symbol> ) </symbol>
+							</term>
+						</term>
+					</expression>
+					<symbol> ) </symbol>
+					<symbol> { </symbol>
+					<statements>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="wall" category="field" index="14" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<integerConstant> 1 </integerConstant>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="x" category="field" index="0" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<identifier name="leftWall" category="field" index="10" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+					</statements>
+					<symbol> } </symbol>
+				</ifStatement>
+				<ifStatement>
+					<keyword> if </keyword>
+					<symbol> ( </symbol>
+					<expression>
+						<term>
+							<symbol> ~ </symbol>
+							<term>
+								<symbol> ( </symbol>
+								<expression>
+									<term>
+										<identifier name="x" category="field" index="0" usage="used"></identifier>
+									</term>
+									<symbol> &lt; </symbol>
+									<term>
+										<identifier name="rightWall" category="field" index="11" usage="used"></identifier>
+									</term>
+								</expression>
+								<symbol> ) </symbol>
+							</term>
+						</term>
+					</expression>
+					<symbol> ) </symbol>
+					<symbol> { </symbol>
+					<statements>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="wall" category="field" index="14" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<integerConstant> 2 </integerConstant>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="x" category="field" index="0" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<identifier name="rightWall" category="field" index="11" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+					</statements>
+					<symbol> } </symbol>
+				</ifStatement>
+				<ifStatement>
+					<keyword> if </keyword>
+					<symbol> ( </symbol>
+					<expression>
+						<term>
+							<symbol> ~ </symbol>
+							<term>
+								<symbol> ( </symbol>
+								<expression>
+									<term>
+										<identifier name="y" category="field" index="1" usage="used"></identifier>
+									</term>
+									<symbol> &gt; </symbol>
+									<term>
+										<identifier name="topWall" category="field" index="12" usage="used"></identifier>
+									</term>
+								</expression>
+								<symbol> ) </symbol>
+							</term>
+						</term>
+					</expression>
+					<symbol> ) </symbol>
+					<symbol> { </symbol>
+					<statements>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="wall" category="field" index="14" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<integerConstant> 3 </integerConstant>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="y" category="field" index="1" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<identifier name="topWall" category="field" index="12" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+					</statements>
+					<symbol> } </symbol>
+				</ifStatement>
+				<ifStatement>
+					<keyword> if </keyword>
+					<symbol> ( </symbol>
+					<expression>
+						<term>
+							<symbol> ~ </symbol>
+							<term>
+								<symbol> ( </symbol>
+								<expression>
+									<term>
+										<identifier name="y" category="field" index="1" usage="used"></identifier>
+									</term>
+									<symbol> &lt; </symbol>
+									<term>
+										<identifier name="bottomWall" category="field" index="13" usage="used"></identifier>
+									</term>
+								</expression>
+								<symbol> ) </symbol>
+							</term>
+						</term>
+					</expression>
+					<symbol> ) </symbol>
+					<symbol> { </symbol>
+					<statements>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="wall" category="field" index="14" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<integerConstant> 4 </integerConstant>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="y" category="field" index="1" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<identifier name="bottomWall" category="field" index="13" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+					</statements>
+					<symbol> } </symbol>
+				</ifStatement>
+				<doStatement>
+					<keyword> do </keyword>
+					<expression>
+						<term>
+							<identifier name="show" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</doStatement>
+				<returnStatement>
+					<keyword> return </keyword>
+					<expression>
+						<term>
+							<identifier name="wall" category="field" index="14" usage="used"></identifier>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</returnStatement>
+			</statements>
+			<symbol> } </symbol>
+		</subroutineBody>
+	</subroutineDec>
+	<subroutineDec>
+		<keyword> method </keyword>
+		<keyword> void </keyword>
+		<identifier name="bounce" category="subroutine" index="-1" usage="declared"></identifier>
+		<symbol> ( </symbol>
+		<parameterList>
+			<keyword> int </keyword>
+			<identifier name="bouncingDirection" category="arg" index="1" usage="declared"></identifier>
+		</parameterList>
+		<symbol> ) </symbol>
+		<subroutineBody>
+			<symbol> { </symbol>
+			<varDec>
+				<keyword> var </keyword>
+				<keyword> int </keyword>
+				<identifier name="newx" category="var" index="0" usage="declared"></identifier>
+				<symbol> , </symbol>
+				<identifier name="newy" category="var" index="1" usage="declared"></identifier>
+				<symbol> , </symbol>
+				<identifier name="divLengthx" category="var" index="2" usage="declared"></identifier>
+				<symbol> , </symbol>
+				<identifier name="divLengthy" category="var" index="3" usage="declared"></identifier>
+				<symbol> , </symbol>
+				<identifier name="factor" category="var" index="4" usage="declared"></identifier>
+				<symbol> ; </symbol>
+			</varDec>
+			<statements>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="divLengthx" category="var" index="2" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<identifier name="lengthx" category="field" index="2" usage="used"></identifier>
+						</term>
+						<symbol> / </symbol>
+						<term>
+							<integerConstant> 10 </integerConstant>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="divLengthy" category="var" index="3" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<identifier name="lengthy" category="field" index="3" usage="used"></identifier>
+						</term>
+						<symbol> / </symbol>
+						<term>
+							<integerConstant> 10 </integerConstant>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<ifStatement>
+					<keyword> if </keyword>
+					<symbol> ( </symbol>
+					<expression>
+						<term>
+							<identifier name="bouncingDirection" category="arg" index="1" usage="used"></identifier>
+						</term>
+						<symbol> = </symbol>
+						<term>
+							<integerConstant> 0 </integerConstant>
+						</term>
+					</expression>
+					<symbol> ) </symbol>
+					<symbol> { </symbol>
+					<statements>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="factor" category="var" index="4" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<integerConstant> 10 </integerConstant>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+					</statements>
+					<symbol> } </symbol>
+					<keyword> else </keyword>
+					<symbol> { </symbol>
+					<statements>
+						<ifStatement>
+							<keyword> if </keyword>
+							<symbol> ( </symbol>
+							<expression>
+								<term>
+									<symbol> ( </symbol>
+									<expression>
+										<term>
+											<symbol> ( </symbol>
+											<expression>
+												<term>
+													<symbol> ~ </symbol>
+													<term>
+														<symbol> ( </symbol>
+														<expression>
+															<term>
+																<identifier name="lengthx" category="field" index="2" usage="used"></identifier>
+															</term>
+															<symbol> &lt; </symbol>
+															<term>
+																<integerConstant> 0 </integerConstant>
+															</term>
+														</expression>
+														<symbol> ) </symbol>
+													</term>
+												</term>
+											</expression>
+											<symbol> ) </symbol>
+										</term>
+										<symbol> &amp; </symbol>
+										<term>
+											<symbol> ( </symbol>
+											<expression>
+												<term>
+													<identifier name="bouncingDirection" category="arg" index="1" usage="used"></identifier>
+												</term>
+												<symbol> = </symbol>
+												<term>
+													<integerConstant> 1 </integerConstant>
+												</term>
+											</expression>
+											<symbol> ) </symbol>
+										</term>
+									</expression>
+									<symbol> ) </symbol>
+								</term>
+								<symbol> | </symbol>
+								<term>
+									<symbol> ( </symbol>
+									<expression>
+										<term>
+											<symbol> ( </symbol>
+											<expression>
+												<term>
+													<identifier name="lengthx" category="field" index="2" usage="used"></identifier>
+												</term>
+												<symbol> &lt; </symbol>
+												<term>
+													<integerConstant> 0 </integerConstant>
+												</term>
+											</expression>
+											<symbol> ) </symbol>
+										</term>
+										<symbol> &amp; </symbol>
+										<term>
+											<symbol> ( </symbol>
+											<expression>
+												<term>
+													<identifier name="bouncingDirection" category="arg" index="1" usage="used"></identifier>
+												</term>
+												<symbol> = </symbol>
+												<term>
+													<symbol> ( </symbol>
+													<expression>
+														<term>
+															<symbol> - </symbol>
+															<term>
+																<integerConstant> 1 </integerConstant>
+															</term>
+														</term>
+													</expression>
+													<symbol> ) </symbol>
+												</term>
+											</expression>
+											<symbol> ) </symbol>
+										</term>
+									</expression>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
+							<symbol> ) </symbol>
+							<symbol> { </symbol>
+							<statements>
+								<letStatement>
+									<keyword> let </keyword>
+									<identifier name="factor" category="var" index="4" usage="used"></identifier>
+									<symbol> = </symbol>
+									<expression>
+										<term>
+											<integerConstant> 20 </integerConstant>
+										</term>
+									</expression>
+									<symbol> ; </symbol>
+								</letStatement>
+							</statements>
+							<symbol> } </symbol>
+							<keyword> else </keyword>
+							<symbol> { </symbol>
+							<statements>
+								<letStatement>
+									<keyword> let </keyword>
+									<identifier name="factor" category="var" index="4" usage="used"></identifier>
+									<symbol> = </symbol>
+									<expression>
+										<term>
+											<integerConstant> 5 </integerConstant>
+										</term>
+									</expression>
+									<symbol> ; </symbol>
+								</letStatement>
+							</statements>
+							<symbol> } </symbol>
+						</ifStatement>
+					</statements>
+					<symbol> } </symbol>
+				</ifStatement>
+				<ifStatement>
+					<keyword> if </keyword>
+					<symbol> ( </symbol>
+					<expression>
+						<term>
+							<identifier name="wall" category="field" index="14" usage="used"></identifier>
+						</term>
+						<symbol> = </symbol>
+						<term>
+							<integerConstant> 1 </integerConstant>
+						</term>
+					</expression>
+					<symbol> ) </symbol>
+					<symbol> { </symbol>
+					<statements>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="newx" category="var" index="0" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<integerConstant> 506 </integerConstant>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="newy" category="var" index="1" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<symbol> ( </symbol>
+									<expression>
+										<term>
+											<identifier name="divLengthy" category="var" index="3" usage="used"></identifier>
+										</term>
+										<symbol> * </symbol>
+										<term>
+											<symbol> ( </symbol>
+											<expression>
+												<term>
+													<symbol> - </symbol>
+													<term>
+														<integerConstant> 50 </integerConstant>
+													</term>
+												</term>
+											</expression>
+											<symbol> ) </symbol>
+										</term>
+									</expression>
+									<symbol> ) </symbol>
+								</term>
+								<symbol> / </symbol>
+								<term>
+									<identifier name="divLengthx" category="var" index="2" usage="used"></identifier>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+						<letStatement>
+							<keyword> let </keyword>
+							<identifier name="newy" category="var" index="1" usage="used"></identifier>
+							<symbol> = </symbol>
+							<expression>
+								<term>
+									<identifier name="y" category="field" index="1" usage="used"></identifier>
+								</term>
+								<symbol> + </symbol>
+								<term>
+									<symbol> ( </symbol>
+									<expression>
+										<term>
+											<identifier name="newy" category="var" index="1" usage="used"></identifier>
+										</term>
+										<symbol> * </symbol>
+										<term>
+											<identifier name="factor" category="var" index="4" usage="used"></identifier>
+										</term>
+									</expression>
+									<symbol> ) </symbol>
+								</term>
+							</expression>
+							<symbol> ; </symbol>
+						</letStatement>
+					</statements>
+					<symbol> } </symbol>
+					<keyword> else </keyword>
+					<symbol> { </symbol>
+					<statements>
+						<ifStatement>
+							<keyword> if </keyword>
+							<symbol> ( </symbol>
+							<expression>
+								<term>
+									<identifier name="wall" category="field" index="14" usage="used"></identifier>
+								</term>
+								<symbol> = </symbol>
+								<term>
+									<integerConstant> 2 </integerConstant>
+								</term>
+							</expression>
+							<symbol> ) </symbol>
+							<symbol> { </symbol>
+							<statements>
+								<letStatement>
+									<keyword> let </keyword>
+									<identifier name="newx" category="var" index="0" usage="used"></identifier>
+									<symbol> = </symbol>
+									<expression>
+										<term>
+											<integerConstant> 0 </integerConstant>
+										</term>
+									</expression>
+									<symbol> ; </symbol>
+								</letStatement>
+								<letStatement>
+									<keyword> let </keyword>
+									<identifier name="newy" category="var" index="1" usage="used"></identifier>
+									<symbol> = </symbol>
+									<expression>
+										<term>
+											<symbol> ( </symbol>
+											<expression>
+												<term>
+													<identifier name="divLengthy" category="var" index="3" usage="used"></identifier>
+												</term>
+												<symbol> * </symbol>
+												<term>
+													<integerConstant> 50 </integerConstant>
+												</term>
+											</expression>
+											<symbol> ) </symbol>
+										</term>
+										<symbol> / </symbol>
+										<term>
+											<identifier name="divLengthx" category="var" index="2" usage="used"></identifier>
+										</term>
+									</expression>
+									<symbol> ; </symbol>
+								</letStatement>
+								<letStatement>
+									<keyword> let </keyword>
+									<identifier name="newy" category="var" index="1" usage="used"></identifier>
+									<symbol> = </symbol>
+									<expression>
+										<term>
+											<identifier name="y" category="field" index="1" usage="used"></identifier>
+										</term>
+										<symbol> + </symbol>
+										<term>
+											<symbol> ( </symbol>
+											<expression>
+												<term>
+													<identifier name="newy" category="var" index="1" usage="used"></identifier>
+												</term>
+												<symbol> * </symbol>
+												<term>
+													<identifier name="factor" category="var" index="4" usage="used"></identifier>
+												</term>
+											</expression>
+											<symbol> ) </symbol>
+										</term>
+									</expression>
+									<symbol> ; </symbol>
+								</letStatement>
+							</statements>
+							<symbol> } </symbol>
+							<keyword> else </keyword>
+							<symbol> { </symbol>
+							<statements>
+								<ifStatement>
+									<keyword> if </keyword>
+									<symbol> ( </symbol>
+									<expression>
+										<term>
+											<identifier name="wall" category="field" index="14" usage="used"></identifier>
+										</term>
+										<symbol> = </symbol>
+										<term>
+											<integerConstant> 3 </integerConstant>
+										</term>
+									</expression>
+									<symbol> ) </symbol>
+									<symbol> { </symbol>
+									<statements>
+										<letStatement>
+											<keyword> let </keyword>
+											<identifier name="newy" category="var" index="1" usage="used"></identifier>
+											<symbol> = </symbol>
+											<expression>
+												<term>
+													<integerConstant> 250 </integerConstant>
+												</term>
+											</expression>
+											<symbol> ; </symbol>
+										</letStatement>
+										<letStatement>
+											<keyword> let </keyword>
+											<identifier name="newx" category="var" index="0" usage="used"></identifier>
+											<symbol> = </symbol>
+											<expression>
+												<term>
+													<symbol> ( </symbol>
+													<expression>
+														<term>
+															<identifier name="divLengthx" category="var" index="2" usage="used"></identifier>
+														</term>
+														<symbol> * </symbol>
+														<term>
+															<symbol> ( </symbol>
+															<expression>
+																<term>
+																	<symbol> - </symbol>
+																	<term>
+																		<integerConstant> 25 </integerConstant>
+																	</term>
+																</term>
+															</expression>
+															<symbol> ) </symbol>
+														</term>
+													</expression>
+													<symbol> ) </symbol>
+												</term>
+												<symbol> / </symbol>
+												<term>
+													<identifier name="divLengthy" category="var" index="3" usage="used"></identifier>
+												</term>
+											</expression>
+											<symbol> ; </symbol>
+										</letStatement>
+										<letStatement>
+											<keyword> let </keyword>
+											<identifier name="newx" category="var" index="0" usage="used"></identifier>
+											<symbol> = </symbol>
+											<expression>
+												<term>
+													<identifier name="x" category="field" index="0" usage="used"></identifier>
+												</term>
+												<symbol> + </symbol>
+												<term>
+													<symbol> ( </symbol>
+													<expression>
+														<term>
+															<identifier name="newx" category="var" index="0" usage="used"></identifier>
+														</term>
+														<symbol> * </symbol>
+														<term>
+															<identifier name="factor" category="var" index="4" usage="used"></identifier>
+														</term>
+													</expression>
+													<symbol> ) </symbol>
+												</term>
+											</expression>
+											<symbol> ; </symbol>
+										</letStatement>
+									</statements>
+									<symbol> } </symbol>
+									<keyword> else </keyword>
+									<symbol> { </symbol>
+									<statements>
+										<letStatement>
+											<keyword> let </keyword>
+											<identifier name="newy" category="var" index="1" usage="used"></identifier>
+											<symbol> = </symbol>
+											<expression>
+												<term>
+													<integerConstant> 0 </integerConstant>
+												</term>
+											</expression>
+											<symbol> ; </symbol>
+										</letStatement>
+										<letStatement>
+											<keyword> let </keyword>
+											<identifier name="newx" category="var" index="0" usage="used"></identifier>
+											<symbol> = </symbol>
+											<expression>
+												<term>
+													<symbol> ( </symbol>
+													<expression>
+														<term>
+															<identifier name="divLengthx" category="var" index="2" usage="used"></identifier>
+														</term>
+														<symbol> * </symbol>
+														<term>
+															<integerConstant> 25 </integerConstant>
+														</term>
+													</expression>
+													<symbol> ) </symbol>
+												</term>
+												<symbol> / </symbol>
+												<term>
+													<identifier name="divLengthy" category="var" index="3" usage="used"></identifier>
+												</term>
+											</expression>
+											<symbol> ; </symbol>
+										</letStatement>
+										<letStatement>
+											<keyword> let </keyword>
+											<identifier name="newx" category="var" index="0" usage="used"></identifier>
+											<symbol> = </symbol>
+											<expression>
+												<term>
+													<identifier name="x" category="field" index="0" usage="used"></identifier>
+												</term>
+												<symbol> + </symbol>
+												<term>
+													<symbol> ( </symbol>
+													<expression>
+														<term>
+															<identifier name="newx" category="var" index="0" usage="used"></identifier>
+														</term>
+														<symbol> * </symbol>
+														<term>
+															<identifier name="factor" category="var" index="4" usage="used"></identifier>
+														</term>
+													</expression>
+													<symbol> ) </symbol>
+												</term>
+											</expression>
+											<symbol> ; </symbol>
+										</letStatement>
+									</statements>
+									<symbol> } </symbol>
+								</ifStatement>
+							</statements>
+							<symbol> } </symbol>
+						</ifStatement>
+					</statements>
+					<symbol> } </symbol>
+				</ifStatement>
+				<doStatement>
+					<keyword> do </keyword>
+					<expression>
+						<term>
+							<identifier name="setDestination" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+								<expression>
+									<term>
+										<identifier name="newx" category="var" index="0" usage="used"></identifier>
+									</term>
+								</expression>
+								<symbol> , </symbol>
+								<expression>
+									<term>
+										<identifier name="newy" category="var" index="1" usage="used"></identifier>
+									</term>
+								</expression>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</doStatement>
+				<returnStatement>
+					<keyword> return </keyword>
+					<symbol> ; </symbol>
+				</returnStatement>
+			</statements>
+			<symbol> } </symbol>
+		</subroutineBody>
+	</subroutineDec>
+	<symbol> } </symbol>
+</class>

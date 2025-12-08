@@ -1,6 +1,10 @@
-push constant 7
-push constant 8
-add
-push constant 15
-sub
-neg
+function SimpleFunction.test 2
+	push local 0
+	push local 1
+	add
+	not
+	push argument 0
+	add
+	push argument 1
+	sub
+	return

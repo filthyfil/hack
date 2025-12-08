@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <cstddef>
+#include <filesystem>
 
 #include "TokenUtils.h"
 #include "SymbolTable.h"
@@ -10,13 +11,14 @@
 
 class CompilationEngine {
 public:
-    CompilationEngine(JackTokenizer& jack_tokenizer, const std::string& base);
+    CompilationEngine(JackTokenizer& jack_tokenizer, bool emit_xml = false);
     ~CompilationEngine();
 
     // entry point
     void compile();
 
 private:
+    bool emit_xml_flag;
     // modules
 
     // references the tokenizer, whose outputs is a stream of tokens
@@ -28,7 +30,11 @@ private:
     // (2) subroutine variables (local, argument)
     SymbolTable class_symbol_table;
     SymbolTable subroutine_symbol_table;
+
+    // track important info 
     std::string class_name;
+    KeyWord current_subroutine_keyword;
+    std::string current_subroutine_name;
 
     // writes VM code
     VMWriter vmwriter;
@@ -38,18 +44,20 @@ private:
     size_t indent_level;
 
     // xml emit helpers
-    void writeIndent();
-    void writeOpen(const std::string& tag);
-    void writeClose(const std::string& tag);
-    void writeToken(const std::string& tag, const std::string& token);
+    void emitIndent();
+    void emitOpen(const std::string& tag);
+    void emitClose(const std::string& tag);
+    void emitToken(const std::string& tag, const std::string& token);
     std::string kindToCategory(Kind k);
     enum class IdentifierUsage { iu_DECLARED, iu_USED };
     enum class IdentifierRole  { ir_VARLIKE, // static/field/arg/var
-                                ir_CLASSNAME, ir_SUBROUTINENAME };
-    void writeIdentifier(const std::string& name, IdentifierUsage usage, IdentifierRole role);
+                                 ir_CLASSNAME, ir_SUBROUTINENAME };
+    void emitIdentifier(const std::string& name, IdentifierUsage usage, IdentifierRole role);
 
     // vm writer helpers
     std::string kindToSegment(Kind k);
+    void writeOp(char op);
+    void writeUnaryOp(char op);
     void pushVar(const std::string& name);
     void popVar(const std::string& name);
     void codeWrite(const std::string& exp);

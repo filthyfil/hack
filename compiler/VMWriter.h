@@ -3,6 +3,8 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include <filesystem>
 #include <unordered_set>
 #include <cstdlib>
 #include <stdexcept>
@@ -20,9 +22,11 @@
 // // };
 
 class VMWriter {
-    std::fstream vm_file;
+    std::ofstream vm_file;
+    unsigned int label_count;
+    
 public:
-    VMWriter(const std::string& vm_file_name);
+    VMWriter(std::filesystem::path vm_file_path);
     
     ~VMWriter();
 
@@ -38,10 +42,13 @@ public:
     // writes a VM label command
     void writeLabel(const std::string& label);
 
-    // writes a VM goto command
-    void writeGoto(const std::string& lable);
+    // get a unique label from the VM writer
+    std::string getLabel();
 
-    // writes a VM if-goto command
+    // writes a VM goto command, unconditiional
+    void writeGoto(const std::string& label);
+
+    // writes a VM if-goto command, if top is non-zero, control jumps to the given label
     void writeIf(const std::string& label);
 
     // writes a VM call command

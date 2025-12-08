@@ -32,36 +32,41 @@ static std::unordered_map<std::string, KeyWord> defined_keywords = {
     {"this", KeyWord::kw_THIS}
 };
 
-JackTokenizer::JackTokenizer(const std::string& file) : 
-    jack_file_name(file),
-    line_number{0} { 
+JackTokenizer::JackTokenizer(std::filesystem::path file, bool emit_xml) : 
+    line_number{0},
+    emit_xml_flag{emit_xml} {
+
     // open input file
     jack_file.open(file);
     if (!jack_file.is_open()) {
-        std::cerr << "[error] unable to open input file: " << file << ".\n";
+        std::cerr << "[error] unable to open input file: " << file.string() << ".\n";
         exit(1);
     }
-    size_t dot = jack_file_name.find_last_of('.');
-    std::string base = jack_file_name.substr(0, dot);
-    std::string t_xml_file_name = base + "T.xml";
-    // open output file
-    t_xml_file.open(t_xml_file_name);
-    if (!t_xml_file.is_open()) {
-        std::cerr << "[error] cannot create XML file: " << t_xml_file_name << " \n";
-        std::exit(1);
+
+    path = file;
+
+    if (emit_xml_flag) {
+        std::filesystem::path t_xml_file_path = path.parent_path() / (path.stem().string() + "T.xml");
+        // open output file
+        t_xml_file.open(t_xml_file_path);
+        if (!t_xml_file.is_open()) {
+            std::cerr << "[error] cannot create XML file: " << t_xml_file_path.string() << " \n";
+            std::exit(1);
+        }
+        // opening format
+        t_xml_file << '<' << "tokens" << '>' << '\n';
     }
-    // opening format
-    t_xml_file << '<' << "tokens" << '>' << '\n';
 }
 
 JackTokenizer::~JackTokenizer() {
     // closing format
-    t_xml_file << "</" << "tokens" << '>' << '\n';
+    if (emit_xml_flag && t_xml_file.is_open()) {
+        t_xml_file << "</" << "tokens" << '>' << '\n';
+        t_xml_file.close();
+    }
 
     if (jack_file.is_open())
         jack_file.close();
-    if (t_xml_file.is_open())
-        t_xml_file.close();
 }
 
 bool JackTokenizer::hasMoreTokens() { return jack_file.peek() != EOF; }
@@ -75,7 +80,8 @@ void JackTokenizer::advance() {
         }
         current_token = t; // assign valid token
         processCurrentToken(current_token);
-        xml_emitter();
+        if (emit_xml_flag) 
+            xml_emitter();
         return;
     }
 }
@@ -87,7 +93,7 @@ std::string JackTokenizer::xml_escape(const std::string& token) {
             case '>': return "&gt;";
             case '"': return "&quot;";
             case '&': return "&amp;";
-            default:  return token;
+            default: return token;
         }
     }
     return token;
@@ -184,9 +190,9 @@ void JackTokenizer::commentAnalyzer() {
 
     // situation 2: block comment "/* ... */"
     std::size_t pos_start = current_line.find("/*");
-    std::size_t pos_end   = current_line.find("*/");
+    std::size_t pos_end = current_line.find("*/");
     if (pos_start != std::string::npos &&
-        pos_end   != std::string::npos &&
+        pos_end != std::string::npos &&
         pos_end > pos_start) {
         current_line = current_line.erase(pos_start, (pos_end - pos_start + 2));
         if (!current_line.empty()) {

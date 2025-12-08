@@ -4,10 +4,13 @@
 // // i would like to change the VM types into enums 
 // // instead of strings but VM is written to take string
 
-VMWriter::VMWriter(const std::string& vm_file_name) {
-    vm_file.open(vm_file_name);
+VMWriter::VMWriter(std::filesystem::path vm_file_path) :
+    label_count{0} {
+    
+    vm_file_path.replace_extension("vm");
+    vm_file.open(vm_file_path);
     if (!vm_file.is_open()) {
-        std::cerr << "[error] cannot create VM file: " << vm_file_name << " \n";
+        std::cerr << "[error] cannot create VM file: " << vm_file_path.string() << " \n";
         std::exit(1);
     }
 }
@@ -37,6 +40,10 @@ void VMWriter::writeArithmetic(const std::string& command) {
 
 void VMWriter::writeLabel(const std::string& label) {
     vm_file << "label " << label << '\n';
+}
+
+std::string VMWriter::getLabel() {
+    return "L" + std::to_string(label_count++);
 }
 
 void VMWriter::writeGoto(const std::string& label) {

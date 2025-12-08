@@ -1,0 +1,133 @@
+function Math.init 0
+function Math.multiply 4
+push constant 0
+pop local 0
+push argument 0
+pop local 1
+push constant 0
+pop local 2
+push constant 1
+pop local 3
+label L0
+push local 2
+push constant 15
+lt
+not
+if-goto L1
+push argument 1
+push local 3
+and
+push local 3
+eq
+not
+if-goto L2
+push local 0
+push local 1
+add
+pop local 0
+label L2
+push local 1
+push local 1
+add
+pop local 1
+push local 3
+push local 3
+add
+pop local 3
+push local 2
+push local 2
+add
+pop local 2
+goto L0
+label L1
+push local 0
+return
+function Math.divide 1
+push argument 1
+push argument 0
+gt
+not
+if-goto L4
+push constant 0
+return
+label L4
+push argument 0
+push argument 1
+push argument 1
+add
+call Math.divide 2
+pop local 0
+push argument 0
+push local 0
+push local 0
+add
+push argument 1
+call Math.multiply 2
+sub
+push argument 1
+lt
+not
+if-goto L6
+push local 0
+push local 0
+add
+return
+goto L7
+label L6
+push local 0
+push local 0
+add
+push constant 1
+add
+return
+label L7
+function Math.sqrt 2
+push constant 0
+pop local 0
+push static 0
+push constant 2
+call Math.divide 2
+pop local 1
+label L8
+push local 1
+push constant 0
+gt
+not
+if-goto L9
+push local 0
+push static 1
+push local 1
+add
+pop pointer 1
+push that 0
+add
+push argument 0
+lt
+push local 0
+push static 1
+push local 1
+add
+pop pointer 1
+push that 0
+add
+push argument 0
+eq
+or
+not
+if-goto L10
+push local 0
+push static 1
+push local 1
+add
+pop pointer 1
+push that 0
+add
+pop local 0
+label L10
+goto L8
+label L9
+push local 0
+return
+function Math.max 0
+function Math.min 0
+function Math.abs 0

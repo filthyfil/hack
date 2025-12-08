@@ -1,0 +1,93 @@
+<class>
+	<keyword> class </keyword>
+	<identifier name="Main" category="class" index="-1" usage="declared"></identifier>
+	<symbol> { </symbol>
+	<subroutineDec>
+		<keyword> function </keyword>
+		<keyword> void </keyword>
+		<identifier name="main" category="subroutine" index="-1" usage="declared"></identifier>
+		<symbol> ( </symbol>
+		<parameterList>
+		</parameterList>
+		<symbol> ) </symbol>
+		<subroutineBody>
+			<symbol> { </symbol>
+			<varDec>
+				<keyword> var </keyword>
+				<identifier name="PongGame" category="class" index="-1" usage="used"></identifier>
+				<identifier name="game" category="var" index="0" usage="declared"></identifier>
+				<symbol> ; </symbol>
+			</varDec>
+			<statements>
+				<doStatement>
+					<keyword> do </keyword>
+					<expression>
+						<term>
+							<identifier name="PongGame" category="class" index="-1" usage="used"></identifier>
+							<symbol> . </symbol>
+							<identifier name="newInstance" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</doStatement>
+				<letStatement>
+					<keyword> let </keyword>
+					<identifier name="game" category="var" index="0" usage="used"></identifier>
+					<symbol> = </symbol>
+					<expression>
+						<term>
+							<identifier name="PongGame" category="class" index="-1" usage="used"></identifier>
+							<symbol> . </symbol>
+							<identifier name="getInstance" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</letStatement>
+				<doStatement>
+					<keyword> do </keyword>
+					<expression>
+						<term>
+							<identifier name="game" category="var" index="0" usage="used"></identifier>
+							<symbol> . </symbol>
+							<identifier name="run" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</doStatement>
+				<doStatement>
+					<keyword> do </keyword>
+					<expression>
+						<term>
+							<identifier name="game" category="var" index="0" usage="used"></identifier>
+							<symbol> . </symbol>
+							<identifier name="dispose" category="subroutine" index="-1" usage="used"></identifier>
+							<symbol> ( </symbol>
+							<expressionList>
+							</expressionList>
+							<symbol> ) </symbol>
+						</term>
+					</expression>
+					<symbol> ; </symbol>
+				</doStatement>
+				<returnStatement>
+					<keyword> return </keyword>
+					<symbol> ; </symbol>
+				</returnStatement>
+			</statements>
+			<symbol> } </symbol>
+		</subroutineBody>
+	</subroutineDec>
+	<symbol> } </symbol>
+</class>
