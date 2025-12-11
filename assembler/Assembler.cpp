@@ -1,4 +1,4 @@
-// hackassembler.cpp
+// Assembler.cpp
 // translates Hack Assembly language to Hack machine code.
 
 #include <iostream>

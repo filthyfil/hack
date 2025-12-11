@@ -1,1 +1,0 @@
-should work according to spec... will update readme later

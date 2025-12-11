@@ -1,0 +1,120 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+/**
+ * This library provides two services: direct access to the computer's main
+ * memory (RAM), and allocation and recycling of memory blocks. The Hack RAM
+ * consists of 32,768 words, each holding a 16-bit binary number.
+ */ 
+class Memory {
+    static Array memory;
+    static int freeList;
+
+    /** Initializes the class. */
+    function void init() {
+        var int heapBase;
+        var int heapSize;
+        let memory = 0;
+
+        let heapBase = 2048;
+        let heapSize = 16483 - heapBase;
+
+        let freeList = heapBase; // heap base
+
+        let memory[freeList] = heapSize; // block size (including header)
+        let memory[freeList + 1] = 0; // no next block yet
+
+        return;
+    }
+
+    /** Returns the RAM value at the given address. */
+    function int peek(int address) {
+        return memory[address];
+    }
+
+    /** Sets the RAM value at the given address to the given value. */
+    function void poke(int address, int value) {
+        let memory[address] = value;
+    }
+
+    /** Finds an available RAM block of the given size and returns
+     *  a reference to its base address. */
+    function int alloc(int size) {
+        var int reqSize; // size including 2 header words
+        var int prev;
+        var int curr; 
+        var int blockSize; 
+        var int restSize; 
+        var int allocHeader;
+
+        // each block reserves 2 words for header (size + next/unused)
+        let reqSize = size + 2;
+
+        // first-fit search
+        let prev = 0;
+        let curr = freeList;
+        while ((~(curr = 0)) & (memory[curr] < reqSize)) {
+            let prev = curr;
+            let curr = memory[curr + 1];
+        }
+
+        // no suitable block found
+        if (curr = 0) {
+            do Sys.error(7);
+            return 0;
+        }
+
+        let blockSize = memory[curr];
+
+        // exact fit (use whole block)
+        if (blockSize = reqSize) {
+            if (prev = 0) {
+                // Removing head of free list
+                let freeList = memory[curr + 1];
+            } else {
+                // Bypass current block in list
+                let memory[prev + 1] = memory[curr + 1];
+            }
+            // Return payload base (two words after header)
+            return curr + 2;
+        }
+
+        // blockSize > reqSize (try to split)
+        let restSize = blockSize - reqSize;
+
+        // if remainder is too small to hold a free block header
+        // just use the whole block to avoid creating garbage fragments
+        if (restSize < 2) {
+            if (prev = 0) {
+                let freeList = memory[curr + 1];
+            } else {
+                let memory[prev + 1] = memory[curr + 1];
+            }
+            return curr + 2;
+        }
+
+        // split from the end of the free block:
+        // [ free(restSize) ][ allocated(reqSize) ]
+        let memory[curr] = restSize;
+
+        let allocHeader = curr + restSize;
+        let memory[allocHeader] = reqSize; 
+        let memory[allocHeader + 1] = 0;
+
+        return allocHeader + 2;
+    }
+
+    /** De-allocates the given object (cast as an array) by making
+     *  it available for future allocations. */
+    function void deAlloc(Array o) {
+        var int header;
+
+        // header address
+        let header = o - 2;
+
+        let memory[header + 1] = freeList;
+        let freeList = header;
+
+        return;
+    }    
+}

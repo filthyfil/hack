@@ -1,0 +1,115 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+/**
+ * A library of functions for displaying graphics on the screen.
+ * The Hack physical screen consists of 512 rows (indexed 0..511, top to bottom)
+ * of 256 pixels each (indexed 0..255, left to right). The top left pixel on 
+ * the screen is indexed (0,0).
+ */
+class Screen {
+    static int SCREEN_BASE;
+    static int SCREEN_LENGTH;
+    static bool color;
+
+    /** Initializes the Screen. */
+    function void init() {
+        let SCREEN_BASE = 16384;
+        let SCREEN_LENGTH = 8191; // 24575 max 
+        let color = true; // black
+        do clearScreen();
+    }
+
+    /** Erases the entire screen. */
+    function void clearScreen() {
+        var int i;
+        let i = 0;
+        while (i < SCREEN_LENGTH) {
+            do Memory.poke(SCREEN_BASE + i, 0);
+            let i = i + 1;
+        }
+        return;
+    }
+
+    /** Sets the current color, to be used for all subsequent drawXXX commands.
+     *  Black is represented by true, white by false. */
+    function void setColor(boolean b) {
+        let color = b;
+        return;
+    }
+
+    /** Draws the (x,y) pixel, using the current color. */
+    function void drawPixel(int x, int y) {
+        var int addr, q, bit;
+        if ((x < 512) & (y < 256) & ~(x < 0) & ~(y < 0)) {
+            // word address? : SCREEN_BASE + (y * 32) + (x / 16)
+            let addr = SCREEN_BASE + Math.multiply(y, 32) + Math.divide(x, 16);
+            // which bit within the word?
+            let q = x & 15; // effectively x mod 16
+            let bit = Math.twoToThePower(q);
+            let q = Memory.peek(addr);
+            if (color) {
+                let q = q | bit; // draw
+            }
+            else {
+                let q = q & ~bit; // erase
+            }
+            do Memory.poke(addr, q);
+        }
+        return;
+    }
+
+    /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+        var int a, b, diff, dx, dy;
+
+        let dx = x2 - x1;
+        let dy = y2 - y1;
+
+        let a = 0;
+        let b = 0;
+        let diff = 0;
+
+        while ((a < (dx + 1)) & (b < (dy + 1))) {
+            do drawPixel(x1 + a, y1 + b);
+            if (diff < 0) {
+                let a = a + 1;
+                let diff = diff + dy;
+            }
+            else {
+                let b = b + 1;
+                let diff = diff - dx;
+            }
+        }
+        return;
+    }
+
+    /** Draws a filled rectangle whose top left corner is (x1, y1)
+     *  and bottom right corner is (x2,y2), using the current color. */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+        var int b, t;
+        let b = y1;
+        let t = y2;
+        while (b < t) {
+            do drawLine(x1,y1, x2,y1); // bottom
+            let b = b + 1;
+        }
+        return;
+    }
+
+    /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
+    function void drawCircle(int x, int y, int r) {
+        var int bot, top;
+        let bot = y - r;
+        let top = y + r;
+
+        while (bot < top) {
+            do drawLine(x - Math.sqrt(Math.multiply(r, r) - Math.multiply(bot, bot)),
+                        y + bot,
+                        x + Math.sqrt(Math.multiply(r, r) - Math.multiply(bot, bot)),
+                        y + bot);
+            let bot = bot + 1;  
+        }
+        return;
+    }
+}

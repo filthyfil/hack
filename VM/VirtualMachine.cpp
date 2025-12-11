@@ -1,4 +1,4 @@
-// hackVM2.cpp
+// VirtualMachine.cpp
 // Translates Hack VM files to Hack Assembly code.
 // Handles both single .vm files and directories containing multiple .vm files.
 
@@ -12,6 +12,9 @@
 #include <sstream>
 #include <stdexcept>
 #include <algorithm>
+#include <chrono>
+#include <iomanip>
+#include <sstream>
 
 class Parser {
 private:
@@ -121,6 +124,15 @@ class CodeWriter {
     unsigned int label_counter = 0;
 
     void push(const std::string &segment, int index) {
+        // #region agent log
+        static int push_count = 0;
+        push_count++;
+        std::ofstream log("/home/filthyfil/Code/hack/.cursor/debug.log", std::ios::app);
+        if (log.is_open() && push_count % 100 == 0) {
+            log << "{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"B\",\"location\":\"VirtualMachine.cpp:123\",\"message\":\"push operation\",\"data\":{\"segment\":\"" << segment << "\",\"index\":" << index << ",\"total_pushes\":\"" << push_count << "\"},\"timestamp\":" << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() << "}\n";
+            log.close();
+        }
+        // #endregion
         static const std::unordered_map<std::string, std::string> base {
             {"local", "LCL"}, {"argument", "ARG"}, {"this", "THIS"}, {"that", "THAT"}
         };

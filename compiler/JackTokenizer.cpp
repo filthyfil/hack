@@ -292,10 +292,12 @@ std::string JackTokenizer::identifier() {
 
 uint16_t JackTokenizer::parse_uint15(const std::string current_token) {
     unsigned long value = std::stoul(current_token);
-    constexpr unsigned long LIMIT = 1ul << 15;  // 32768
-    if (value > LIMIT)
-        throw std::out_of_range("[error] integer " + current_token + " exceeds 2^15 hardware limit.\n");
-    return static_cast<uint16_t>(value);
+    constexpr unsigned long LIMIT = 1ul << 15; // 32768
+    if ((value < LIMIT) || (value >= -LIMIT))
+        return static_cast<uint16_t>(value);    
+    else {    
+        throw std::out_of_range("[error] Integer " + current_token + " at line " + std::to_string(line_number) + " exceeds 2^15 hardware limit.\n > " + current_line + '\n');
+    }
 }
 
 int JackTokenizer::intVal() {
