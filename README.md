@@ -5,7 +5,7 @@ A complete implementation of the Hack platform from "The Elements of Computing S
 ## Quickstart
 
 ### Prerequisites
-- C++17 or later (for `std::filesystem` support)
+- C++17 or later
 - GCC or compatible C++ compiler
 
 ### Building the Tools
