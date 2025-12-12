@@ -42,6 +42,20 @@ The easiest way to build a complete program is using the `build.sh` script:
 # Output will be in build/o.hack
 ```
 
+Although, for use of the VMEmulator, I recommend using: 
+
+```bash
+INCLUDE_OS=0 ./build.sh compiler/test_programs/Pong
+```
+
+whereby compiled files will be created and stored in `/src`, or
+
+```bash
+./j compiler/test_programs/Pong
+```
+
+whereby compiled files will be created and stored in the provided directory (`/Pong`). This is because user created programs should be tested with the built-in OS implementation for a more robust and safe OS implementation. 
+
 ## Quick Programming
 
 For quick testing and development, there's a `Main.jack` file in the project root that you can edit directly. This file provides a convenient starting point for writing and testing Jack programs without creating a new directory structure.
