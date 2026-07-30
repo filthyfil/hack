@@ -22,11 +22,30 @@ module cpu #(
 	wire [2:0] d = instruction[5:3];
 	wire [2:0] j = instruction[2:0];
 	
-	wire rst_n = ~reset;
+	wire rst_n = ~reset; // high fanout
+	
+	// internal wiring
+	wire [WIDTH-1:0] alu_out;
+	wire [WIDTH-1:0] instruction0 = instruction_type ? alu_out : instruction;
+	wire [WIDTH-1:0] a_reg_out;
+	wire a_reg_load = ~instruction_type | d[2];
+	wire [WIDTH-1:0] d_reg_out;
+	wire d_reg_load = d[1];
+	wire [WIDTH-1:0] alu_y = a ? inM : a_reg_out;
+	wire alu_zero;
+	wire alu_negative;
+	
+	wire jump_condition = (j[0] & ~alu_negative & ~alu_zero) | 
+                              (j[1] & alu_zero) | 
+                              (j[2] & alu_negative);
+	wire p_c_load = jump_condition & instruction_type;
+	wire p_c_inc = ~p_c_load;
+
+
 	// instantiate modules:
 	// alu, 2 registers, program counter
 	// ALU
-	alu alu_unit #(.WIDTH(WIDTH))(
+	alu #(.WIDTH(WIDTH)) alu_unit(
 		// input
 		.x(d_reg_out),
 		.y(alu_y),
@@ -44,7 +63,7 @@ module cpu #(
 		.out(alu_out)
 	); 
 	// A REGISTER
-	register a_register_unit #(.WIDTH(WIDTH))(
+	register #(.WIDTH(WIDTH)) a_register_unit(
 		// input
 		.clk(clk),
 		.rst_n(rst_n),
@@ -54,7 +73,7 @@ module cpu #(
 		.q(a_reg_out)
 	); 
 	// D REGISTER
-	register d_register_unit #(.WIDTH(WIDTH))(
+	register #(.WIDTH(WIDTH)) d_register_unit(
 		// input
 		.clk(clk),
 		.rst_n(rst_n),
@@ -65,7 +84,7 @@ module cpu #(
 	);
 	// PROGRAM COUNTER
 	// for SPI ram, have enable on PC while waiting for memory
-	program_counter program_counter_unit #(.WIDTH(WIDTH))(
+	program_counter #(.WIDTH(WIDTH)) program_counter_unit(
 		// input
 		.clk(clk), 
 		.rst_n(rst_n),
@@ -75,23 +94,6 @@ module cpu #(
 		// output
 		.out(pc)
 	);
-
-	// internal wiring
-	wire [WIDTH-1:0] alu_out;
-	wire [WIDTH-1:0] instruction0 = instruction_type ? alu_out : instruction;
-	wire [WIDTH-1:0] a_reg_out;
-	wire a_reg_load = ~instruction_type | d[2];
-	wire [WIDTH-1:0] d_reg_out;
-	wire d_reg_load = d[1];
-	wire [WIDTH-1:0] alu_y = a ? inM : a_reg_out;
-	wire alu_zero;
-	wire alu_negative;
-	
-	wire jump_condition = (j[0] & ~alu_negative & ~alu_zero) | 
-                              (j[1] & alu_zero) | 
-                              (j[2] & alu_negative);
-	wire p_c_load = jump_condition & instruction_type;
-	wire p_c_inc = ~p_c_load;
 
 	// i/o assignments from internal
 	assign addressM = a_reg_out[WIDTH-2:0];

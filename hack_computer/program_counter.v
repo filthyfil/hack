@@ -12,7 +12,7 @@ module program_counter #(
 	input wire inc,
 
 	// output
-	output reg [15:0] out
+	output reg [WIDTH-1:0] out
 );
 	always @(posedge clk or negedge rst_n) begin
 		if (rst_n == 0) 
